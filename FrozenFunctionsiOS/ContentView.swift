@@ -30,8 +30,8 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingAddItem) {
-//                AddItemView() // skeleton version below
-//                    .environment(\.managedObjectContext, viewContext)
+            AddItemView() // skeleton version below
+                    .environment(\.managedObjectContext, viewContext)
             }
         }
     }
