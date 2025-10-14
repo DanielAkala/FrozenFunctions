@@ -1,42 +1,68 @@
 import SwiftUI
 import UserNotifications
 
-//ADDME: allergens (common ones like peanuts, shellfish, vegan/vegetarian) dropdown selection
-
 struct ProfileView: View {
-    
     @State private var name = "TestUser"
     @State private var fridgeType = "DefaultFridge"
     @State private var isEditing = false
+    @State private var selectedOption: String = "None"
+    @State private var isEditingText: Bool = false
+    @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
         NavigationView {
             Form {
-//                Text("Edit")
-//                    .toolbar {
-//                        ToolbarItem(placement: .navigationBarTrailing) {
-//                            Button(action: { isEditing.toggle()}) {
-//                                Label("Add", systemImage: "plus")
-//                            }
-                            Section(header: Text("Profile")){
-                                Text(name)
-                                    .textInputAutocapitalization(.words)
-                                    .autocorrectionDisabled()
-                                Text(fridgeType)
-                                
-                                // Change to be when editing username, fridge, etc
-                                TextField("Item name", text: $name)
-                                    .textInputAutocapitalization(.words)
-                                    .autocorrectionDisabled() // doesnt save between sessions
-                                
-                            }
+                Section(header: Text("Profile")){
+                    if isEditingText {
+                        TextField("Name", text: $name)
+                            .focused($isTextFieldFocused)
+                            .textInputAutocapitalization(.words)
+                            .autocorrectionDisabled() // doesnt save between sessions
+                    } else {
+                        Text("Name: " + name)
+                            .textInputAutocapitalization(.words)
+                            .autocorrectionDisabled()
+                    }
+                    if isEditingText {
+                        TextField("Fridge Name", text: $fridgeType)
+                            .focused($isTextFieldFocused)
+                            .textInputAutocapitalization(.words)
+                            .autocorrectionDisabled() // doesnt save between sessions
+                    } else {
+                        Text("Fridge: " + fridgeType)
+                            .textInputAutocapitalization(.words)
+                            .autocorrectionDisabled()
+                    }
+                    Button (isEditingText ? "Done" : "Edit") {
+                        isEditingText.toggle()
+                    }
+                    
+                }
+                
+                // Diet:
+                Section(header: Text("Dietary Restrictions")) {
+                    Menu (selectedOption) {
+                        Button("None") {
+                            selectedOption = "None"
+                        }
+                        Button("Vegan") {
+                            selectedOption = "Vegan"
+                        }
+                        Button("Vegetarian") {
+                            selectedOption = "Vegetarian"
+                        }
+                        Button("Pescatarian") {
+                            selectedOption = "Pescatarian"
+                        }
+                        Button("Peanut Allergy") {
+                            selectedOption = "Peanut Allergy"
+                        }
+                        Button("Lactose Intolerance") {
+                            selectedOption = "Lactose Intolerance"
                         }
                     }
+                }
             }
         }
-//    }
-//}
-
-#Preview {
-    ProfileView()
+    }
 }
