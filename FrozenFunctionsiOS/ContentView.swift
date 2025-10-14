@@ -7,7 +7,6 @@ struct ContentView: View {
     
     var body: some View {
         
-        
         TabView {
             HomeView()
                 .tabItem {
@@ -19,4 +18,8 @@ struct ContentView: View {
                 }
         }
     }
+}
+
+#Preview {
+    ContentView()
 }
