@@ -2,7 +2,7 @@ import SwiftUI
 
 struct Styles {
     struct Colors {
-        static let mainColor = Color(UIColor.black)
+        static let mainColor = Color(UIColor.init(red: 0.074, green: 0.153, blue: 0.278, alpha: 1))
         static let secondaryColor = Color(UIColor.gray)
         static let accentColor = Color(UIColor.white)
     }
