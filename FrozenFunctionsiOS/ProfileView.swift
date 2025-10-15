@@ -12,7 +12,9 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             ZStack {
+                
                 Styles.Colors.mainColor.ignoresSafeArea()
+    
                 Form {
                     if isEditingText {
                         TextField("Name", text: $name)
@@ -21,31 +23,35 @@ struct ProfileView: View {
                             .autocorrectionDisabled() // doesnt save between sessions
                             .font(.title3)
                             .foregroundColor(Styles.Colors.accentColor)
+ 
                     } else {
                         Text("Name: " + name)
                             .textInputAutocapitalization(.words)
                             .autocorrectionDisabled()
                             .font(.title3)
                             .foregroundColor(Styles.Colors.accentColor)
+                            .listRowBackground(Styles.Colors.secondaryColor)
                     }
                     if isEditingText {
                         TextField("Fridge Name", text: $fridgeType)
-                            .focused($isTextFieldFocused)
                             .textInputAutocapitalization(.words)
-                            .autocorrectionDisabled() // doesnt save between sessions
+                            .autocorrectionDisabled()
                             .font(.title3)
                             .foregroundColor(Styles.Colors.accentColor)
+                            .listRowBackground(Styles.Colors.secondaryColor)
                     } else {
                         Text("Fridge: " + fridgeType)
                             .textInputAutocapitalization(.words)
                             .autocorrectionDisabled()
                             .font(.title3)
                             .foregroundColor(Styles.Colors.accentColor)
+                            .listRowBackground(Styles.Colors.secondaryColor)
                     }
                     Button (isEditingText ? "Done" : "Edit") {
                         isEditingText.toggle()
                     }
                     
+                    .listRowBackground(Styles.Colors.secondaryColor)
                     .navigationTitle("Profile")
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
@@ -78,14 +84,15 @@ struct ProfileView: View {
                                 selectedOption = "Lactose Intolerance"
                             }
                         }
+                        .listRowBackground(Styles.Colors.secondaryColor)
                     }
+                    .listRowBackground(Styles.Colors.secondaryColor)
                 }
+                .scrollContentBackground(.hidden)
             }
         }
     }
 }
-
-
 #Preview {
     ProfileView()
 }
