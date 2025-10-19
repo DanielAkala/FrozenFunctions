@@ -45,6 +45,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7A18A4282EA58DB1003CF1B9 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOSTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FrozenFunctions.xcdatamodeld,
+				Persistence.swift,
+			);
+			target = 7AD75BF12E82521C007F9281 /* FrozenFunctionsiOSTests */;
+		};
 		7A98D7A92E838248002B08E2 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -56,6 +64,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AddItemView.swift,
+				FrozenFunctions.xcdatamodeld,
+				Persistence.swift,
 			);
 			target = 7AD75BFB2E82521C007F9281 /* FrozenFunctionsiOSUITests */;
 		};
@@ -66,6 +76,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				7A98D7A92E838248002B08E2 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOS" target */,
+				7A18A4282EA58DB1003CF1B9 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOSTests" target */,
 				7A98D7AA2E838248002B08E2 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOSUITests" target */,
 			);
 			path = FrozenFunctionsiOS;
