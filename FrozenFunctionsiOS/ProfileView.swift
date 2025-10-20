@@ -23,6 +23,7 @@ struct ProfileView: View {
                             .autocorrectionDisabled() // doesnt save between sessions
                             .font(.title3)
                             .foregroundColor(Styles.Colors.accentColor)
+                            .listRowBackground(Styles.Colors.secondaryColor)
  
                     } else {
                         Text("Name: " + name)

@@ -1,49 +1,3 @@
-/*import SwiftUI
-import UserNotifications
-
-struct AddItemView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    @State private var name = ""
-    @State private var quantity = 1
-    @State private var expirationDate = Date()
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Food Info")) {
-                    TextField("Item name", text: $name)
-                        .textInputAutocapitalization(.words)
-                        .autocorrectionDisabled()
-
-                    Stepper(value: $quantity, in: 1...100) {
-                        Text("Quantity: \(quantity)")
-                    }
-
-                    DatePicker("Expires on", selection: $expirationDate, displayedComponents: .date)
-                }
-
-                Section(footer: Text("In this sprint, Save only closes the form (no persistence yet).")) {
-                    Button("Save (UI Only)") {
-                        dismiss()
-                    }
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
-            }
-            .navigationTitle("Add Food")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-            }
-        }
-    }
-}
-
-#Preview {
-    AddItemView()
-}*/
-
 import SwiftUI
 import CoreData
 
@@ -57,27 +11,58 @@ struct AddItemView: View {
 
     var body: some View {
         NavigationView {
-            Form {
-                Section(header: Text("Food Info")) {
-                    TextField("Item name", text: $name)
-                        .textInputAutocapitalization(.words)
-                        .autocorrectionDisabled()
+            ZStack{
+                
+                Styles.Colors.mainColor.ignoresSafeArea()
+                
+                Form {
+                    Section {
+                        HStack {
+                            Label("Item Name:", systemImage: "pencil.circle.fill")
+                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
+                            
+                            TextField("Enter Food Name", text: $name)
+                                .textInputAutocapitalization(.words)
+                                .autocorrectionDisabled()
+                        }
+                        .listRowBackground(Styles.Colors.secondaryColor)
 
-                    Stepper(value: $quantity, in: 1...100) {
-                        Text("Quantity: \(quantity)")
+                        Stepper(value: $quantity, in: 1...100) {
+                            Label("Quantity: \(quantity)", systemImage: "number.circle.fill")
+                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
+                        }
+                        .listRowBackground(Styles.Colors.secondaryColor)
+
+                        DatePicker(selection: $expirationDate, displayedComponents: .date) {
+                            HStack {
+                                Label("Expires On", systemImage: "calendar.badge.clock")
+                                    .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
+                            }
+                        }.datePickerStyle(.wheel)
+                         .listRowBackground(Styles.Colors.secondaryColor)
+                        
+                    } header: {
+                        Label("Food Information", systemImage: "fork.knife.circle.fill")
                     }
-
-                    DatePicker("Expires on", selection: $expirationDate, displayedComponents: .date)
+                    Section {
+                        Button("Save") { saveItem() }
+                            .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                    .listRowBackground(Styles.Colors.secondaryColor)
                 }
+                
+                .navigationTitle("Add Food")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+                    }
+                }.colorScheme(.dark)
 
-                Section {
-                    Button("Save") { saveItem() }
-                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-            .navigationTitle("Add Food")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                .background(Styles.Colors.mainColor)
+                .scrollContentBackground(.hidden)
             }
         }
     }
@@ -99,4 +84,8 @@ struct AddItemView: View {
             print("Save failed: \(error.localizedDescription)")
         }
     }
+}
+
+#Preview {
+    AddItemView()
 }
