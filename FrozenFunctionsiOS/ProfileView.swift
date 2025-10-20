@@ -63,7 +63,7 @@ struct ProfileView: View {
                     .toolbarColorScheme(.dark, for: .navigationBar)
                     
                     // Diet:
-                    Section(header: Text("Dietary Restrictions")) {
+                    Section(header: Text("Dietary Restrictions").foregroundColor(Styles.Colors.accentColor)) {
                         Menu (selectedOption) {
                             Button("None") {
                                 selectedOption = "None"

@@ -111,13 +111,14 @@ struct HomeView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(item.name ?? "Unnamed Item")
                                         .font(.headline)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(Styles.Colors.accentColor)
 
                                     HStack {
                                         Text("Qty: \(item.quantity)")
+                                            .foregroundColor(Styles.Colors.accentColor)
                                         Spacer()
                                         Text("Expires: \(formatDate(item.expirationDate))")
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Styles.Colors.accentColor)
                                     }
                                     .font(.subheadline)
                                 }
