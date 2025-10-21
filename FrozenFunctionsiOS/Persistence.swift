@@ -1,11 +1,3 @@
-//
-//  Persistence.swift
-//  FrozenFunctionsiOS
-//
-//  Created by csuftitan on 10/19/25.
-//
-
-
 import CoreData
 
 struct PersistenceController {
@@ -13,7 +5,7 @@ struct PersistenceController {
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "FrozenFunctions") // must match model name
+        container = NSPersistentContainer(name: "FrozenFunctions")
         if inMemory {
             container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
         }
