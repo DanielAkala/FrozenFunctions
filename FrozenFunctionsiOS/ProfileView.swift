@@ -21,9 +21,9 @@ struct ProfileView: View {
                     // --- Name Editing Section ---
                     if isEditingText {
                         HStack {
-                            Text("Name:")
+                            Label("Name:", systemImage: "person.circle.fill")
                                 .font(.title3)
-                                .foregroundColor(Styles.Colors.accentColor)
+                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
                             
                             TextField("Enter Name", text: $name)
                                 .focused($isTextFieldFocused)
@@ -34,11 +34,11 @@ struct ProfileView: View {
                         } .listRowBackground(Styles.Colors.secondaryColor)
                         
                     } else {
-                        Text("Name: " + name)
+                        Label("Name: " + name, systemImage: "person.circle.fill")
                             .textInputAutocapitalization(.words)
                             .autocorrectionDisabled()
                             .font(.title3)
-                            .foregroundColor(Styles.Colors.accentColor)
+                            .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
                             .listRowBackground(Styles.Colors.secondaryColor)
                             .onTapGesture {
                                 isEditingText = true
@@ -49,9 +49,9 @@ struct ProfileView: View {
                     // --- Fridge Editing Section ---
                     if isEditingText {
                         HStack {
-                            Text("Fridge:")
+                            Label("Fridge:", systemImage: "snowflake")
                                 .font(.title3)
-                                .foregroundColor(Styles.Colors.accentColor)
+                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
                             
                             TextField("Fridge Name", text: $fridgeType)
                                 .focused($isTextFieldFocused)
@@ -62,11 +62,11 @@ struct ProfileView: View {
                         } .listRowBackground(Styles.Colors.secondaryColor)
                         
                     } else {
-                        Text("Fridge: " + fridgeType)
+                        Label("Fridge: " + fridgeType, systemImage: "snowflake")
                             .textInputAutocapitalization(.words)
                             .autocorrectionDisabled()
                             .font(.title3)
-                            .foregroundColor(Styles.Colors.accentColor)
+                            .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
                             .listRowBackground(Styles.Colors.secondaryColor)
                             .onTapGesture {
                                 isEditingText = true
@@ -87,9 +87,9 @@ struct ProfileView: View {
                         .foregroundColor(Styles.Colors.accentColor))
                     {
                         HStack {
-                            Text("Selected:")
-                                .foregroundStyle(Styles.Colors.accentColor)
+                            Label("Selected:", systemImage: "figure.walk.circle.fill")
                                 .font(.title3)
+                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
 
                             if isEditingRestrictions {
                                 Picker("Restriction", selection: $selectedOption) {
@@ -116,6 +116,7 @@ struct ProfileView: View {
                             }
                         }
                         .listRowBackground(Styles.Colors.secondaryColor)
+                        .colorScheme(.dark)
 
                         Button (isEditingRestrictions ? "Done" : "Edit") {
                             isEditingRestrictions.toggle()
