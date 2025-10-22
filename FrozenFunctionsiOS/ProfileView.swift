@@ -115,9 +115,7 @@ struct ProfileView: View {
                     }
 
                     // --- Dietary Restrictions Section ---
-                    Section(header: Text("Dietary Restrictions")
-                        .foregroundColor(Styles.Colors.accentColor))
-                    {
+                    Section {
                         HStack(alignment: .center, spacing: 8) {
                             Label("Selected:", systemImage: "leaf.circle.fill")
                                 .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
@@ -156,6 +154,9 @@ struct ProfileView: View {
                             }
                         }
                         .listRowBackground(Styles.Colors.secondaryColor)
+                    }
+                    header: {
+                        Label("Dietery Restiction", systemImage: "fork.knife")
                     }
                 }
                 .scrollContentBackground(.hidden)
