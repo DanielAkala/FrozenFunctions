@@ -9,6 +9,9 @@ struct ProfileView: View {
     @State private var isEditingText: Bool = false
     @State private var isEditingRestrictions: Bool = false
     
+    @State private var tempName = ""
+    @State private var tempFridgeType = ""
+    
     @FocusState private var isTextFieldFocused: Bool
         
     var body: some View {
@@ -18,83 +21,111 @@ struct ProfileView: View {
                 Styles.Colors.mainColor.ignoresSafeArea()
                 
                 Form {
-                    // --- Name Editing Section ---
-                    if isEditingText {
-                        HStack {
+                    Section {
+                        // --- Name Editing Section ---
+                        HStack(alignment: .center, spacing: 8) {
                             Label("Name:", systemImage: "person.circle.fill")
-                                .font(.title3)
                                 .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
+                                .font(.title3)
+                                .frame(width: 120, alignment: .leading)
                             
-                            TextField("Enter Name", text: $name)
-                                .focused($isTextFieldFocused)
-                                .textInputAutocapitalization(.words)
-                                .autocorrectionDisabled()
-                                .font(.title3)
-                                .foregroundColor(Styles.Colors.thirdColor)
-                        } .listRowBackground(Styles.Colors.secondaryColor)
-                        
-                    } else {
-                        Label("Name: " + name, systemImage: "person.circle.fill")
-                            .textInputAutocapitalization(.words)
-                            .autocorrectionDisabled()
-                            .font(.title3)
-                            .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
-                            .listRowBackground(Styles.Colors.secondaryColor)
-                            .onTapGesture {
-                                isEditingText = true
-                                isTextFieldFocused = true
+                            if isEditingText {
+                                TextField("Enter Name", text: $tempName)
+                                    .focused($isTextFieldFocused)
+                                    .textInputAutocapitalization(.words)
+                                    .autocorrectionDisabled()
+                                    .font(.title3)
+                                    .foregroundColor(Styles.Colors.thirdColor)
+                            } else {
+                                Text(name)
+                                    .font(.title3)
+                                    .foregroundColor(Styles.Colors.accentColor)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                    }
-                    
-                    // --- Fridge Editing Section ---
-                    if isEditingText {
-                        HStack {
-                            Label("Fridge:", systemImage: "snowflake")
-                                .font(.title3)
-                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
-                            
-                            TextField("Fridge Name", text: $fridgeType)
-                                .focused($isTextFieldFocused)
-                                .textInputAutocapitalization(.words)
-                                .autocorrectionDisabled()
-                                .font(.title3)
-                                .foregroundColor(Styles.Colors.thirdColor)
-                        } .listRowBackground(Styles.Colors.secondaryColor)
-                        
-                    } else {
-                        Label("Fridge: " + fridgeType, systemImage: "snowflake")
-                            .textInputAutocapitalization(.words)
-                            .autocorrectionDisabled()
-                            .font(.title3)
-                            .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
-                            .listRowBackground(Styles.Colors.secondaryColor)
-                            .onTapGesture {
-                                isEditingText = true
-                                isTextFieldFocused = true
-                            }
-                    }
-                    
-                    Button (isEditingText ? "Done" : "Edit") {
-                        isEditingText.toggle()
-                        if !isEditingText {
-                            isTextFieldFocused = false
                         }
+                        .frame(height: 44)
+                        .listRowBackground(Styles.Colors.secondaryColor)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if !isEditingText {
+                                tempName = name
+                                isEditingText = false
+                                isTextFieldFocused = false
+                            }
+                        }
+                        
+                        // --- Fridge Editing Section ---
+                        HStack(alignment: .center, spacing: 8) {
+                            Label("Fridge:", systemImage: "snowflake")
+                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
+                                .font(.title3)
+                                .frame(width: 120, alignment: .leading)
+                            
+                            if isEditingText {
+                                TextField("Fridge Name", text: $tempFridgeType)
+                                    .focused($isTextFieldFocused)
+                                    .textInputAutocapitalization(.words)
+                                    .autocorrectionDisabled()
+                                    .font(.title3)
+                                    .foregroundColor(Styles.Colors.thirdColor)
+                            } else {
+                                Text(fridgeType)
+                                    .font(.title3)
+                                    .foregroundColor(Styles.Colors.accentColor)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .frame(height: 44)
+                        .listRowBackground(Styles.Colors.secondaryColor)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if !isEditingText {
+                                tempName = name
+                                tempFridgeType = fridgeType
+                                isEditingText = false
+                                isTextFieldFocused = false
+                            }
+                        }
+                        
+                        Button (isEditingText ? "Done" : "Edit") {
+                            if isEditingText {
+                                // Save only if not empty, otherwise revert
+                                let trimmedName = tempName.trimmingCharacters(in: .whitespacesAndNewlines)
+                                let trimmedFridge = tempFridgeType.trimmingCharacters(in: .whitespacesAndNewlines)
+                                
+                                if !trimmedName.isEmpty {
+                                    name = trimmedName
+                                }
+                                if !trimmedFridge.isEmpty {
+                                    fridgeType = trimmedFridge
+                                }
+                            } else {
+                                tempName = name
+                                tempFridgeType = fridgeType
+                            }
+                            
+                            isEditingText.toggle()
+                            if !isEditingText {
+                                isTextFieldFocused = false
+                            }
+                        }
+                        .listRowBackground(Styles.Colors.secondaryColor)
+                    } header: {
+                        Label("Personal Information", systemImage: "person.text.rectangle.fill")
                     }
-                    .listRowBackground(Styles.Colors.secondaryColor)
 
                     // --- Dietary Restrictions Section ---
                     Section(header: Text("Dietary Restrictions")
                         .foregroundColor(Styles.Colors.accentColor))
                     {
-                        HStack {
-                            Label("Selected:", systemImage: "figure.walk.circle.fill")
-                                .font(.title3)
+                        HStack(alignment: .center, spacing: 8) {
+                            Label("Selected:", systemImage: "leaf.circle.fill")
                                 .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
+                                .font(.title3)
 
                             if isEditingRestrictions {
                                 Picker("Restriction", selection: $selectedOption) {
-                                    ForEach(Styles.Constants.dietaryRestrictions, id: \.self){
-                                        option in
+                                    ForEach(Styles.Constants.dietaryRestrictions, id: \.self) { option in
                                         Text(option)
                                     }
                                 }
@@ -109,14 +140,13 @@ struct ProfileView: View {
                                     .font(.title3)
                                     .foregroundColor(Styles.Colors.accentColor)
                                     .onTapGesture {
-                                        isEditingRestrictions = true
+                                        isEditingRestrictions = false
                                         isEditingText = false
                                         isTextFieldFocused = false
                                     }
                             }
                         }
                         .listRowBackground(Styles.Colors.secondaryColor)
-                        .colorScheme(.dark)
 
                         Button (isEditingRestrictions ? "Done" : "Edit") {
                             isEditingRestrictions.toggle()
@@ -127,19 +157,15 @@ struct ProfileView: View {
                         }
                         .listRowBackground(Styles.Colors.secondaryColor)
                     }
-
-                    .navigationTitle("Profile")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                        }
-                    }
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .toolbarBackground(Styles.Colors.mainColor, for: .navigationBar)
-                    .toolbarColorScheme(.dark, for: .navigationBar)
                 }
                 .scrollContentBackground(.hidden)
+                .colorScheme(.dark)
             }
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Styles.Colors.mainColor, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
     }
 }

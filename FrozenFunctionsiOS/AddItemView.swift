@@ -8,8 +8,8 @@ struct AddItemView: View {
     @State private var name = ""
     @State private var quantity = 1
     @State private var expirationDate = Date()
-    // 1. State for the scale effect
-    @State private var quantityScale: CGFloat = 1.0
+    @State private var showError = false
+    @State private var errorMessage = ""
 
     var body: some View {
         NavigationView {
@@ -26,49 +26,43 @@ struct AddItemView: View {
                             TextField("Enter Food Name", text: $name)
                                 .textInputAutocapitalization(.words)
                                 .autocorrectionDisabled()
+                                .foregroundColor(Styles.Colors.accentColor)
                         }
                         .listRowBackground(Styles.Colors.secondaryColor)
 
                         Stepper(value: $quantity, in: 1...100) {
-                            HStack {
-                                Label("Quantity: ", systemImage: "number.circle.fill")
-                                    .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
-                                Text("\(quantity)")
-                                    .font(.body.weight(.bold))
-                                    .scaleEffect(quantityScale)
-                                    .onChange(of: quantity) {
-                                        withAnimation(.interactiveSpring(response: 0.1, dampingFraction: 0.5, blendDuration: 0.5)) {
-                                            quantityScale = 1.2
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            withAnimation(.interactiveSpring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.5)) {
-                                                quantityScale = 1.0
-                                            }
-                                        }
-                                    }
-                                Spacer()
-                            }
+                            Label("Quantity: \(quantity)", systemImage: "number.circle.fill")
+                                .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
                         }
                         .listRowBackground(Styles.Colors.secondaryColor)
 
                         DatePicker(selection: $expirationDate, displayedComponents: .date) {
                             HStack {
-                                Label("Expires On:", systemImage: "calendar.badge.clock")
+                                Label("Expires On", systemImage: "calendar.badge.clock")
                                     .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
                             }
-                        }.datePickerStyle(.wheel)
-                         .listRowBackground(Styles.Colors.secondaryColor)
+                        }
+                        .datePickerStyle(.wheel)
+                        .listRowBackground(Styles.Colors.secondaryColor)
                         
                     } header: {
                         Label("Food Information", systemImage: "fork.knife.circle.fill")
+                            .foregroundColor(Styles.Colors.accentColor)
                     }
+                    
                     Section {
-                        Button("Save") { saveItem() }
-                            .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        Button("Save") {
+                            saveItem()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Styles.Colors.secondaryColor)
+                        .foregroundColor(Styles.Colors.accentColor)
+                        .cornerRadius(8)
+                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .listRowBackground(Styles.Colors.mainColor)
                     }
-                    .listRowBackground(Styles.Colors.secondaryColor)
                 }
-                
                 .navigationTitle("Add Food")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -76,11 +70,18 @@ struct AddItemView: View {
                         Button("Cancel") {
                             dismiss()
                         }
+                        .foregroundColor(Styles.Colors.accentColor)
                     }
-                }.colorScheme(.dark)
-
-                .background(Styles.Colors.mainColor)
+                }
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarBackground(Styles.Colors.mainColor, for: .navigationBar)
+                .toolbarColorScheme(.dark, for: .navigationBar)
                 .scrollContentBackground(.hidden)
+                .alert("Error", isPresented: $showError) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(errorMessage)
+                }
             }
         }
     }
@@ -89,17 +90,24 @@ struct AddItemView: View {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
+        print("Attempting to save item: \(trimmed)")
+        
         let item = FoodItem(context: viewContext)
         item.id = UUID()
         item.name = trimmed
         item.quantity = Int16(quantity)
         item.expirationDate = expirationDate
+        
+        print("Item created with ID: \(item.id?.uuidString ?? "nil")")
 
         do {
             try viewContext.save()
+            print("Save successful!")
             dismiss()
         } catch {
             print("Save failed: \(error.localizedDescription)")
+            errorMessage = "Failed to save: \(error.localizedDescription)"
+            showError = true
         }
     }
 }
