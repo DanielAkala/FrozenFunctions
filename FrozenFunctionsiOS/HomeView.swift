@@ -5,7 +5,6 @@ struct HomeView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var showingAddItem = false
 
-    // Fetch saved FoodItems, sorted by soonest expiration first
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \FoodItem.expirationDate, ascending: true)],
         animation: .default
@@ -49,13 +48,19 @@ struct HomeView: View {
                                     Text(item.name ?? "Unnamed Item")
                                         .font(.headline)
                                         .foregroundColor(Styles.Colors.accentColor)
+                                        .padding(.horizontal, 24)
+
 
                                     HStack {
                                         Text("Qty: \(item.quantity)")
                                             .foregroundColor(Styles.Colors.accentColor)
+                                            .padding(.horizontal, 24)
+
                                         Spacer()
                                         Text("Expires: \(formatDate(item.expirationDate))")
                                             .foregroundColor(Styles.Colors.accentColor)
+                                            .padding(.horizontal, 24)
+
                                     }
                                     .font(.subheadline)
                                 }
@@ -63,9 +68,10 @@ struct HomeView: View {
                                 .listRowBackground(
                                     RoundedRectangle(cornerRadius: 20)
                                         .fill(Styles.Colors.secondaryColor)
-                                        .padding(.vertical, 5)
+                                        .padding(.vertical, 6)
+                                        .padding(.horizontal, 12)
                                 )
-                                .listRowInsets(EdgeInsets(top: 20, leading: 8, bottom: 20, trailing: 8))
+                                .listRowInsets(EdgeInsets(top: 18, leading: 8, bottom: 18, trailing: 8))
                                 .shadow(color: .white.opacity(0.5), radius: 10, x: 0, y: 10)
                             }
                             .onDelete(perform: deleteItems)

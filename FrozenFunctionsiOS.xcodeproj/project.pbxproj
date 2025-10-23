@@ -7,12 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7A902B102E96E4AE00ED4E68 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A902B0C2E96E4AE00ED4E68 /* Assets.xcassets */; };
-		7A902B112E96E4AE00ED4E68 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A902B0D2E96E4AE00ED4E68 /* ContentView.swift */; };
-		7A902B122E96E4AE00ED4E68 /* FrozenFunctionsiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A902B0E2E96E4AE00ED4E68 /* FrozenFunctionsiOSApp.swift */; };
 		7A902B132E96E4AE00ED4E68 /* AddItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A902B0B2E96E4AE00ED4E68 /* AddItemView.swift */; };
-		7A902B192E96F01D00ED4E68 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A902B162E96F01800ED4E68 /* ProfileView.swift */; };
-		7A902B1F2E96FC6B00ED4E68 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A902B1C2E96FC6900ED4E68 /* HomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -273,7 +268,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7A902B102E96E4AE00ED4E68 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,10 +292,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7A902B1F2E96FC6B00ED4E68 /* HomeView.swift in Sources */,
-				7A902B112E96E4AE00ED4E68 /* ContentView.swift in Sources */,
-				7A902B122E96E4AE00ED4E68 /* FrozenFunctionsiOSApp.swift in Sources */,
-				7A902B192E96F01D00ED4E68 /* ProfileView.swift in Sources */,
 				7A902B132E96E4AE00ED4E68 /* AddItemView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -394,6 +384,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -450,6 +441,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};

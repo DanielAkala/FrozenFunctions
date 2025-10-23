@@ -35,6 +35,7 @@ struct AddItemView: View {
                                 .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
                         }
                         .listRowBackground(Styles.Colors.secondaryColor)
+                        .colorScheme(.dark)
 
                         DatePicker(selection: $expirationDate, displayedComponents: .date) {
                             HStack {
@@ -44,10 +45,11 @@ struct AddItemView: View {
                         }
                         .datePickerStyle(.wheel)
                         .listRowBackground(Styles.Colors.secondaryColor)
+                        .colorScheme(.dark)
                         
                     } header: {
                         Label("Food Information", systemImage: "fork.knife.circle.fill")
-                            .foregroundColor(Styles.Colors.accentColor)
+                            .foregroundColor(Styles.Colors.thirdColor)
                     }
                     
                     Section {
