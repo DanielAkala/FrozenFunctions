@@ -1,3 +1,66 @@
+/*import SwiftUI
+import UserNotifications
+
+struct HomeView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @State private var showingAddItem = false
+    @State private var showingProfile = false
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Styles.Colors.mainColor.ignoresSafeArea()
+                
+                VStack(spacing: 12) {
+                    Image(systemName: "snowflake")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 100, height: 100)
+                        .foregroundColor(Styles.Colors.accentColor)
+                    
+                    Text("Your fridge is empty 🧊")
+                        .font(.title3)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(Styles.Colors.accentColor)
+                    
+                    HStack(spacing: 0) {
+                        Text("To Add Items please tap the plus ")
+                            .font(.title3)
+                            .foregroundColor(Styles.Colors.accentColor)
+                        
+                        Image(systemName: "plus")
+                            .font(.title3)
+                            .foregroundColor(Styles.Colors.accentColor)
+                    }
+                    
+                    Text("icon in the top right corner")
+                        .font(.title3)
+                        .foregroundColor(Styles.Colors.accentColor)
+                }
+            }
+            .navigationTitle("FrozenFunctions")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingAddItem = true }) {
+                        Label("Add", systemImage: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddItem) {
+                AddItemView().environment(\.managedObjectContext, viewContext)
+            }
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Styles.Colors.mainColor, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+    }
+}
+
+
+#Preview {
+    HomeView()
+}*/
+
 import SwiftUI
 import CoreData
 
@@ -5,6 +68,7 @@ struct HomeView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var showingAddItem = false
 
+    // Fetch saved FoodItems, sorted by soonest expiration first
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \FoodItem.expirationDate, ascending: true)],
         animation: .default
@@ -45,55 +109,55 @@ struct HomeView: View {
                         List {
                             ForEach(items) { item in
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(item.name ?? "Unnamed Item")
-                                        .font(.headline)
-                                        .foregroundColor(Styles.Colors.accentColor)
-                                        .padding(.horizontal, 24)
+                                    HStack {
+                                        Text(item.name ?? "Unnamed Item")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
 
+                                        if isExpired(item.expirationDate) {
+                                            Text("Expired")
+                                                .font(.caption2)
+                                                .foregroundColor(.white)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.red)
+                                                .cornerRadius(6)
+                                        } else if isExpiringSoon(item.expirationDate) {
+                                            Text("Use Soon")
+                                                .font(.caption2)
+                                                .foregroundColor(.white)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.orange)
+                                                .cornerRadius(6)
+                                        }
+                                    }
 
                                     HStack {
                                         Text("Qty: \(item.quantity)")
-                                            .foregroundColor(Styles.Colors.accentColor)
-                                            .padding(.horizontal, 24)
-
                                         Spacer()
                                         Text("Expires: \(formatDate(item.expirationDate))")
-                                            .foregroundColor(Styles.Colors.accentColor)
-                                            .padding(.horizontal, 24)
-
+                                            .foregroundColor(colorForExpiration(item.expirationDate))
                                     }
                                     .font(.subheadline)
                                 }
-                                .padding(.vertical, 10)
-                                .listRowBackground(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(Styles.Colors.secondaryColor)
-                                        .padding(.vertical, 6)
-                                        .padding(.horizontal, 12)
-                                )
-                                .listRowInsets(EdgeInsets(top: 18, leading: 8, bottom: 18, trailing: 8))
-                                .shadow(color: .white.opacity(0.5), radius: 10, x: 0, y: 10)
+                                .listRowBackground(Styles.Colors.secondaryColor) // ← attach here
                             }
                             .onDelete(perform: deleteItems)
                         }
-                        .listStyle(.plain)
                         .scrollContentBackground(.hidden)
-                        .background(Styles.Colors.mainColor)
                     }
                 }
             }
             .navigationTitle("FrozenFunctions")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     EditButton()
-                        .foregroundColor(Styles.Colors.accentColor)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddItem = true }) {
                         Label("Add", systemImage: "plus")
                     }
-                    .foregroundColor(Styles.Colors.accentColor)
                 }
             }
             .sheet(isPresented: $showingAddItem) {
@@ -121,6 +185,23 @@ struct HomeView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+    }
+    
+    private func isExpired(_ date: Date?) -> Bool {
+        guard let date = date else { return false }
+        return date < Date()
+    }
+
+    private func isExpiringSoon(_ date: Date?) -> Bool {
+        guard let date = date else { return false }
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+        return date <= tomorrow && !isExpired(date)
+    }
+
+    private func colorForExpiration(_ date: Date?) -> Color {
+        if isExpired(date) { return .red }
+        if isExpiringSoon(date) { return .orange }
+        return .secondary
     }
 }
 
