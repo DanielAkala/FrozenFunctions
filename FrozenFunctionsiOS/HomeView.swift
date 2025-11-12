@@ -45,12 +45,30 @@ struct HomeView: View {
                         List {
                             ForEach(items) { item in
                                 VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
                                     Text(item.name ?? "Unnamed Item")
                                         .font(.headline)
                                         .foregroundColor(Styles.Colors.accentColor)
                                         .padding(.horizontal, 24)
-
-
+                                    
+                                        if isExpired(item.expirationDate) {
+                                            Text("Expired")
+                                                .font(.caption2)
+                                                .foregroundColor(.white)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.red)
+                                                .cornerRadius(6)
+                                        } else if isExpiringSoon(item.expirationDate) {
+                                            Text("Use Soon")
+                                                .font(.caption2)
+                                                .foregroundColor(.white)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.orange)
+                                                .cornerRadius(6)
+                                        }
+                                    }
                                     HStack {
                                         Text("Qty: \(item.quantity)")
                                             .foregroundColor(Styles.Colors.accentColor)
@@ -72,7 +90,7 @@ struct HomeView: View {
                                         .padding(.horizontal, 12)
                                 )
                                 .listRowInsets(EdgeInsets(top: 18, leading: 8, bottom: 18, trailing: 8))
-                                .shadow(color: .white.opacity(0.5), radius: 10, x: 0, y: 10)
+                                //.shadow(color: .white.opacity(0.5), radius: 10, x: 0, y: 10)
                             }
                             .onDelete(perform: deleteItems)
                         }
@@ -121,7 +139,25 @@ struct HomeView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+        
+        
     }
+    private func isExpired(_ date: Date?) -> Bool {
+            guard let date = date else { return false }
+            return date < Date()
+        }
+
+        private func isExpiringSoon(_ date: Date?) -> Bool {
+            guard let date = date else { return false }
+            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+            return date <= tomorrow && !isExpired(date)
+        }
+
+        private func colorForExpiration(_ date: Date?) -> Color {
+            if isExpired(date) { return .red }
+            if isExpiringSoon(date) { return .orange }
+            return .secondary
+        }
 }
 
 #Preview {

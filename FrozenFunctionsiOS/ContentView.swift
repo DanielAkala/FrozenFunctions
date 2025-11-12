@@ -6,6 +6,21 @@ struct ContentView: View {
     @State private var showingAddItem = false
     @State private var showingProfile = false
     
+    // Fetch fridge items so the badge updates live
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \FoodItem.name, ascending: true)],
+        animation: .default
+    )
+    private var items: FetchedResults<FoodItem>
+    
+    // Count recipes whose ingredients are all present
+    private var matchingRecipeCount: Int {
+        let fridgeNames = items.compactMap { $0.name?.lowercased() }
+        return sampleRecipes.filter { recipe in
+            recipe.ingredients.allSatisfy { fridgeNames.contains($0.lowercased()) }
+        }.count
+    }
+    
     var body: some View {
         TabView {
             HomeView()
@@ -14,8 +29,10 @@ struct ContentView: View {
                 }
             RecipeSuggestionsView()
                 .tabItem { Label("Recipes", systemImage: "book.fill") }
+                .badge(matchingRecipeCount)
                 // Hide badge when 0 by passing nil
                 //.tabBadge(matchingRecipeCount)
+                //.tabBarItem.badgeValue = matchingRecipeCount
             ProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person.fill")
