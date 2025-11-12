@@ -12,6 +12,10 @@ struct ContentView: View {
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
+            RecipeSuggestionsView()
+                .tabItem { Label("Recipes", systemImage: "book.fill") }
+                // Hide badge when 0 by passing nil
+                //.tabBadge(matchingRecipeCount)
             ProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person.fill")
