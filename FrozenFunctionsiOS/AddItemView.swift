@@ -60,7 +60,7 @@ struct AddItemView: View {
                         .padding()
                         .background(Styles.Colors.secondaryColor)
                         .foregroundColor(Styles.Colors.accentColor)
-                        .cornerRadius(8)
+                        .cornerRadius(12)
                         .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         .listRowBackground(Styles.Colors.mainColor)
                     }

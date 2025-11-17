@@ -52,6 +52,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AddItemView.swift,
+				FrozenFunctions_FireBase,
 			);
 			target = 7AD75BE42E825216007F9281 /* FrozenFunctionsiOS */;
 		};
@@ -73,6 +74,9 @@
 				7A98D7A92E838248002B08E2 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOS" target */,
 				7A18A4282EA58DB1003CF1B9 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOSTests" target */,
 				7A98D7AA2E838248002B08E2 /* Exceptions for "FrozenFunctionsiOS" folder in "FrozenFunctionsiOSUITests" target */,
+			);
+			explicitFolders = (
+				FrozenFunctions_FireBase,
 			);
 			path = FrozenFunctionsiOS;
 			sourceTree = "<group>";
@@ -466,6 +470,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/FrozenFunctionsiOS/FrozenFunctions_FireBase/functions/node_modules/@unrs/resolver-binding-darwin-arm64",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cpsc362.FrozenFunctionsiOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -497,6 +505,10 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/FrozenFunctionsiOS/FrozenFunctions_FireBase/functions/node_modules/@unrs/resolver-binding-darwin-arm64",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cpsc362.FrozenFunctionsiOS;
