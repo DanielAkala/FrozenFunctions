@@ -5,6 +5,10 @@ struct HomeView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var showingAddItem = false
 
+    // State for the clean-out reminder
+    @State private var showExpiredAlert = false
+    @State private var hasShownExpiredAlert = false
+
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \FoodItem.expirationDate, ascending: true)],
         animation: .default
@@ -46,11 +50,11 @@ struct HomeView: View {
                             ForEach(items) { item in
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack {
-                                    Text(item.name ?? "Unnamed Item")
-                                        .font(.headline)
-                                        .foregroundColor(Styles.Colors.accentColor)
-                                        .padding(.horizontal, 24)
-                                    
+                                        Text(item.name ?? "Unnamed Item")
+                                            .font(.headline)
+                                            .foregroundColor(Styles.Colors.accentColor)
+                                            .padding(.horizontal, 24)
+                                        
                                         if isExpired(item.expirationDate) {
                                             Text("Expired")
                                                 .font(.caption2)
@@ -78,7 +82,6 @@ struct HomeView: View {
                                         Text("Expires: \(formatDate(item.expirationDate))")
                                             .foregroundColor(Styles.Colors.accentColor)
                                             .padding(.horizontal, 24)
-
                                     }
                                     .font(.subheadline)
                                 }
@@ -121,6 +124,14 @@ struct HomeView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Styles.Colors.mainColor, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            // Clean-out reminder logic
+            .onAppear(perform: checkExpiredThreshold)
+            .alert("🧼 Clean Out Reminder",
+                   isPresented: $showExpiredAlert) {
+                Button("Got it!", role: .cancel) { }
+            } message: {
+                Text("You have at least 3 expired items. It might be time to clean out your fridge.")
+            }
         }
     }
 
@@ -139,25 +150,36 @@ struct HomeView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
-        
-        
     }
+    
     private func isExpired(_ date: Date?) -> Bool {
-            guard let date = date else { return false }
-            return date < Date()
-        }
+        guard let date = date else { return false }
+        return date < Date()
+    }
 
-        private func isExpiringSoon(_ date: Date?) -> Bool {
-            guard let date = date else { return false }
-            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-            return date <= tomorrow && !isExpired(date)
-        }
+    private func isExpiringSoon(_ date: Date?) -> Bool {
+        guard let date = date else { return false }
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+        return date <= tomorrow && !isExpired(date)
+    }
 
-        private func colorForExpiration(_ date: Date?) -> Color {
-            if isExpired(date) { return .red }
-            if isExpiringSoon(date) { return .orange }
-            return .secondary
+    private func colorForExpiration(_ date: Date?) -> Color {
+        if isExpired(date) { return .red }
+        if isExpiringSoon(date) { return .orange }
+        return .secondary
+    }
+    
+    // New: check for too many expired items
+    private func checkExpiredThreshold() {
+        guard !hasShownExpiredAlert else { return }
+        let expiredCount = items.filter { isExpired($0.expirationDate) }.count
+        
+        if expiredCount >= 3 {
+            showExpiredAlert = true
+            hasShownExpiredAlert = true
+            print("🧼 Clean out reminder triggered: \(expiredCount) expired items.")
         }
+    }
 }
 
 #Preview {
