@@ -9,6 +9,7 @@ struct RecipeSuggestionsView: View {
     @State private var fetchedRecipes: [Recipe] = []
     @State private var isLoading = false
     @State private var loadError: Error?
+    @State private var lastRequestTime: Date?
     
     private let recipeService = RecipeService()
     
@@ -27,48 +28,104 @@ struct RecipeSuggestionsView: View {
             ZStack {
                 Styles.Colors.mainColor.ignoresSafeArea()
 
-                List {
-                    if isLoading {
+                if isLoading {
+                    // Centered loading indicator
+                    VStack {
+                        Spacer()
                         ProgressView("Generating recipes...")
-                            .foregroundColor(.white)
-                            .listRowBackground(Styles.Colors.secondaryColor)
-                    } else if let error = loadError {
-                        // Display error message if API call failed
-                        Text("Error: \(error.localizedDescription)")
-                            .foregroundColor(.red)
-                            .listRowBackground(Styles.Colors.secondaryColor)
-                    } else if fetchedRecipes.isEmpty {
-                        Text("Your fridge items are ready! Tap 'Generate Recipes' to get ideas 💡")
-                            .foregroundColor(.white.opacity(0.7))
+                            .progressViewStyle(CircularProgressViewStyle(tint: Styles.Colors.accentColor))
+                            .foregroundColor(Styles.Colors.accentColor)
+                            .scaleEffect(1.2)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List {
+                        if let error = loadError {
+                            // Display error message if API call failed
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Oops! Something went wrong")
+                                    .font(.headline)
+                                    .foregroundColor(.red)
+                                
+                                Text(errorMessageForUser(error))
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.8))
+                                
+                                Button("Try Again") {
+                                    Task {
+                                        await loadRecipes()
+                                    }
+                                }
+                                .padding(.top, 8)
+                                .foregroundColor(Styles.Colors.accentColor)
+                            }
                             .padding()
                             .listRowBackground(Styles.Colors.secondaryColor)
-                    } else {
-                        // Display the fetched recipes
-                        ForEach(fetchedRecipes) { recipe in
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(recipe.name)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-
-                                // Display new API properties
-                                Text("Prep Time: \(recipe.prepTime ?? "N/A") | Difficulty: \(recipe.difficulty ?? "N/A")")
-                                    .font(.subheadline)
-                                    .foregroundColor(Styles.Colors.thirdColor)
+                        } else if fetchedRecipes.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "fork.knife")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(Styles.Colors.accentColor.opacity(0.6))
                                 
-                                Text("Ingredients: \(recipe.ingredients.joined(separator: ", "))")
+                                Text("Ready to cook something delicious?")
+                                    .font(.headline)
+                                    .foregroundColor(Styles.Colors.accentColor)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text("Tap 'Generate Recipes' to get personalized meal ideas based on your fridge contents!")
                                     .font(.subheadline)
                                     .foregroundColor(.white.opacity(0.7))
-
-                                Text(recipe.instructions)
-                                    .font(.caption)
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
                             }
-                            .padding(.vertical, 6)
-                            .listRowBackground(Styles.Colors.secondaryColor)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 40)
+                            .listRowBackground(Color.clear)
+                        } else {
+                            // Display the fetched recipes
+                            ForEach(fetchedRecipes) { recipe in
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(recipe.name)
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+
+                                    // Display new API properties
+                                    HStack {
+                                        Label(recipe.prepTime ?? "N/A", systemImage: "clock")
+                                        Spacer()
+                                        Label(recipe.difficulty ?? "N/A", systemImage: "chart.bar")
+                                    }
+                                    .font(.subheadline)
+                                    .foregroundColor(Styles.Colors.thirdColor)
+                                    
+                                    Text("Ingredients:")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding(.top, 4)
+                                    
+                                    Text(recipe.ingredients.joined(separator: ", "))
+                                        .font(.subheadline)
+                                        .foregroundColor(.white.opacity(0.7))
+
+                                    Text("Instructions:")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding(.top, 4)
+                                    
+                                    Text(recipe.instructions)
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.6))
+                                }
+                                .padding(.vertical, 6)
+                                .listRowBackground(Styles.Colors.secondaryColor)
+                            }
                         }
                     }
+                    .scrollContentBackground(.hidden)
                 }
-                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Meal Ideas")
             .toolbar {
@@ -79,7 +136,8 @@ struct RecipeSuggestionsView: View {
                             await loadRecipes()
                         }
                     }
-                    .foregroundColor(Styles.Colors.accentColor)
+                    .foregroundColor(canMakeRequest() ? Styles.Colors.accentColor : Styles.Colors.accentColor.opacity(0.5))
+                    .disabled(!canMakeRequest())
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -89,18 +147,52 @@ struct RecipeSuggestionsView: View {
         }
     }
     
+    // Check if enough time has passed since last request (5 second cooldown)
+    private func canMakeRequest() -> Bool {
+        if isLoading { return false }
+        
+        guard let lastTime = lastRequestTime else { return true }
+        return Date().timeIntervalSince(lastTime) >= 5
+    }
+    
+    // Convert technical errors to user-friendly messages
+    private func errorMessageForUser(_ error: Error) -> String {
+        let errorString = error.localizedDescription.lowercased()
+        
+        if errorString.contains("503") || errorString.contains("overloaded") || errorString.contains("unavailable") {
+            return "The AI service is busy right now. Please try again in a moment."
+        } else if errorString.contains("429") || errorString.contains("quota") || errorString.contains("rate limit") {
+            return "Too many requests. Please wait a moment before trying again."
+        } else if errorString.contains("400") || errorString.contains("invalid") {
+            return "There was a problem with your request. Please make sure you have items in your fridge."
+        } else if errorString.contains("network") || errorString.contains("internet") {
+            return "Please check your internet connection and try again."
+        } else {
+            return "Unable to generate recipes. Please try again later."
+        }
+    }
+    
     private func loadRecipes() async {
         guard !fridgeItems.isEmpty else {
-            fetchedRecipes = []
-            loadError = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Your fridge is empty! Add items first."])
+            await MainActor.run {
+                fetchedRecipes = []
+                loadError = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Your fridge is empty! Add items first."])
+            }
             return
         }
         
-        isLoading = true
-        loadError = nil
+        // Don't allow if cooldown hasn't passed
+        if !canMakeRequest() { return }
+        
+        await MainActor.run {
+            isLoading = true
+            loadError = nil
+            lastRequestTime = Date()
+        }
         
         // 1. Prepare API parameters
-        let fridgeNames = fridgeItems.compactMap { $0.name }
+        let allFridgeNames = fridgeItems.compactMap { $0.name }
+        let fridgeNames = Array(allFridgeNames.prefix(15))
         let diet = profiles.first?.diet ?? "None"
         
         // 2. Call the API asynchronously
@@ -112,7 +204,7 @@ struct RecipeSuggestionsView: View {
                 self.isLoading = false
             }
         } catch {
-            print("Error fetching recipes: \(error.localizedDescription)")
+            print("🔴 Error fetching recipes: \(error.localizedDescription)")
             // Update UI on the main actor
             await MainActor.run {
                 self.loadError = error

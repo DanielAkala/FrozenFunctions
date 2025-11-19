@@ -12,7 +12,10 @@
         "*.local"
       ],
       "timeoutSeconds": 180,
-      "memory": "512MiB"
+      "memory": "512MiB",
+      "params": [
+        "GEMINI_API_KEY"
+      ]
     }
   ]
 }
