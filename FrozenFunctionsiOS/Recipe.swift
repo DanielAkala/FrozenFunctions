@@ -1,61 +1,52 @@
 import Foundation
 
-struct Recipe: Identifiable {
+// Sample recipes for the badge count in ContentView
+// These are simple recipes that match against fridge items
+struct SimpleRecipe: Identifiable {
     let id = UUID()
     let name: String
     let ingredients: [String]
-    let instructions: String
 }
 
-let sampleRecipes: [Recipe] = [
-    Recipe(
+let sampleRecipes: [SimpleRecipe] = [
+    SimpleRecipe(
         name: "Grilled Cheese Sandwich",
-        ingredients: ["bread", "cheese", "butter"],
-        instructions: "Butter two slices of bread, place cheese between them, and grill on both sides until golden brown."
+        ingredients: ["bread", "cheese", "butter"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Fruit Salad",
-        ingredients: ["apple", "banana", "orange"],
-        instructions: "Chop all fruits, mix in a bowl, and chill before serving."
+        ingredients: ["apple", "banana", "orange"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Omelette",
-        ingredients: ["egg", "milk", "salt"],
-        instructions: "Whisk eggs with milk and salt, pour into a pan, and cook until fluffy."
+        ingredients: ["egg", "milk", "salt"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Pasta Alfredo",
-        ingredients: ["pasta", "milk", "cheese", "butter"],
-        instructions: "Boil pasta. In a pan, melt butter, add milk and cheese to create sauce, then mix with pasta."
+        ingredients: ["pasta", "milk", "cheese", "butter"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Avocado Toast",
-        ingredients: ["bread", "avocado", "salt"],
-        instructions: "Toast the bread, mash the avocado, spread it on top, and sprinkle with salt."
+        ingredients: ["bread", "avocado", "salt"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Tomato Soup",
-        ingredients: ["tomato", "onion", "salt"],
-        instructions: "Cook chopped tomatoes and onions, blend until smooth, and season with salt."
+        ingredients: ["tomato", "onion", "salt"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Peanut Butter Smoothie",
-        ingredients: ["milk", "banana", "peanut butter"],
-        instructions: "Blend banana, milk, and peanut butter until creamy."
+        ingredients: ["milk", "banana", "peanut butter"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Chicken Stir Fry",
-        ingredients: ["chicken", "rice", "onion", "soy sauce"],
-        instructions: "Cook chicken and onions in a pan, add soy sauce, and serve with rice."
+        ingredients: ["chicken", "rice", "onion", "soy sauce"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Veggie Omelette",
-        ingredients: ["egg", "bell pepper", "onion", "salt"],
-        instructions: "Whisk eggs, add chopped peppers and onions, season, and cook until done."
+        ingredients: ["egg", "bell pepper", "onion", "salt"]
     ),
-    Recipe(
+    SimpleRecipe(
         name: "Pancakes",
-        ingredients: ["flour", "milk", "egg", "butter"],
-        instructions: "Mix flour, milk, and eggs, then cook on a buttered skillet until golden on both sides."
+        ingredients: ["flour", "milk", "egg", "butter"]
     )
 ]

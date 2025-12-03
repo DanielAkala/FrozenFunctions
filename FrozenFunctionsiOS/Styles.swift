@@ -21,6 +21,22 @@ struct Styles {
             content.background(Styles.Colors.mainColor).foregroundColor(.white).cornerRadius(8).font(Styles.Fonts.headingFont)
         }
     }
+
+    struct CustomTextFieldStyle: TextFieldStyle {
+        func _body(configuration: TextField<Self._Label>) -> some View {
+            configuration
+                // This is for the actual text input and placeholder
+                .foregroundColor(Styles.Colors.accentColor)
+                .padding(12)
+                .background(
+                    // Use the secondary color for the background of the text field
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Styles.Colors.secondaryColor)
+                )
+                // Sets the cursor color to match the rest of your UI
+                .accentColor(Styles.Colors.accentColor)
+        }
+    }
     
     struct Constants {
         static let dietaryRestrictions = [
@@ -31,6 +47,18 @@ struct Styles {
             "Peanut Allergy",
             "Lactose Intolerance"
         ]
+        static let units = [
+            "Items",
+            "Box(es)",
+            "Bag(s)",
+            "Bottle(s)",
+            "Can(s)",
+            "lbs",
+            "oz",
+            "kg",
+            "g",
+            "L",
+            "mL"]
     }
     
 }
