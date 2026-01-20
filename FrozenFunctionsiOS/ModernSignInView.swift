@@ -116,8 +116,6 @@ struct ModernSignInView: View {
                                     .stroke(Color.white.opacity(0.2), lineWidth: 1)
                             )
                         }
-                        
-                        // ✅ Forgot Password Button
                         Button(action: { showForgotPassword = true }) {
                             Text("Forgot Password?")
                                 .font(.subheadline)
