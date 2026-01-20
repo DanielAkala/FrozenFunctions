@@ -4,8 +4,7 @@ import CoreData
 
 struct RecipeSuggestionsView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    
-    // State variables to hold API data and manage UI state
+
     @State private var fetchedRecipes: [Recipe] = []
     @State private var isLoading = false
     @State private var loadError: Error?
@@ -29,7 +28,6 @@ struct RecipeSuggestionsView: View {
                 Styles.Colors.mainColor.ignoresSafeArea()
 
                 if isLoading {
-                    // Centered loading indicator
                     VStack {
                         Spacer()
                         ProgressView("Generating recipes...")
@@ -42,7 +40,6 @@ struct RecipeSuggestionsView: View {
                 } else {
                     List {
                         if let error = loadError {
-                            // Display error message if API call failed
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Oops! Something went wrong")
                                     .font(.headline)
@@ -83,14 +80,11 @@ struct RecipeSuggestionsView: View {
                             .padding(.vertical, 40)
                             .listRowBackground(Color.clear)
                         } else {
-                            // Display the fetched recipes
                             ForEach(fetchedRecipes) { recipe in
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text(recipe.name)
                                         .font(.headline)
                                         .foregroundColor(.white)
-
-                                    // Display new API properties
                                     HStack {
                                         Label(recipe.prepTime ?? "N/A", systemImage: "clock")
                                         Spacer()
@@ -130,7 +124,6 @@ struct RecipeSuggestionsView: View {
             .navigationTitle("Meal Ideas")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    // Button to trigger the API call
                     Button("Generate Recipes") {
                         Task {
                             await loadRecipes()
@@ -146,16 +139,14 @@ struct RecipeSuggestionsView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
         }
     }
-    
-    // Check if enough time has passed since last request (5 second cooldown)
+
     private func canMakeRequest() -> Bool {
         if isLoading { return false }
         
         guard let lastTime = lastRequestTime else { return true }
         return Date().timeIntervalSince(lastTime) >= 5
     }
-    
-    // Convert technical errors to user-friendly messages
+
     private func errorMessageForUser(_ error: Error) -> String {
         let errorString = error.localizedDescription.lowercased()
         
@@ -180,8 +171,7 @@ struct RecipeSuggestionsView: View {
             }
             return
         }
-        
-        // Don't allow if cooldown hasn't passed
+
         if !canMakeRequest() { return }
         
         await MainActor.run {
@@ -189,23 +179,19 @@ struct RecipeSuggestionsView: View {
             loadError = nil
             lastRequestTime = Date()
         }
-        
-        // 1. Prepare API parameters
+
         let allFridgeNames = fridgeItems.compactMap { $0.name }
         let fridgeNames = Array(allFridgeNames.prefix(15))
         let diet = profiles.first?.diet ?? "None"
-        
-        // 2. Call the API asynchronously
+
         do {
             let recipes = try await recipeService.fetchRecipes(for: fridgeNames, diet: diet)
-            // Update UI on the main actor
             await MainActor.run {
                 self.fetchedRecipes = recipes
                 self.isLoading = false
             }
         } catch {
             print("🔴 Error fetching recipes: \(error.localizedDescription)")
-            // Update UI on the main actor
             await MainActor.run {
                 self.loadError = error
                 self.isLoading = false
