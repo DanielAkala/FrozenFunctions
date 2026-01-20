@@ -3,7 +3,6 @@ import FirebaseFirestore
 import FirebaseAuth
 import CoreData
 
-// MARK: - Firestore Models
 struct FirestoreFoodItem: Codable {
     var id: String
     var name: String
@@ -88,14 +87,11 @@ struct FirestoreProfile: Codable {
     }
 }
 
-// MARK: - Firestore Service
 class FirestoreService {
     static let shared = FirestoreService()
     private let db = Firestore.firestore()
     
     private init() {}
-    
-    // MARK: - Food Items Sync
     
     func syncFoodItemsToCloud(context: NSManagedObjectContext) async throws {
         guard let userId = Auth.auth().currentUser?.uid,
@@ -134,18 +130,14 @@ class FirestoreService {
             let snapshot = try await db.collection("foodItems")
                 .whereField("userId", isEqualTo: userId)
                 .getDocuments()
-            
-            // ✅ FIX: Don't delete local items, merge with cloud
+
             await MainActor.run {
-                // Get existing local item IDs
                 let fetchRequest: NSFetchRequest<FoodItem> = FoodItem.fetchRequest()
                 let existingItems = (try? context.fetch(fetchRequest)) ?? []
                 let existingIDs = Set(existingItems.compactMap { $0.id?.uuidString })
-                
-                // Add only NEW items from cloud
+
                 for document in snapshot.documents {
                     if let firestoreItem = FirestoreFoodItem(document: document.data()) {
-                        // Skip if item already exists locally
                         if existingIDs.contains(firestoreItem.id) {
                             continue
                         }
@@ -197,9 +189,7 @@ class FirestoreService {
         try await db.collection("foodItems").document(id).delete()
         print("✅ Deleted food item from Firestore")
     }
-    
-    // MARK: - Profile Sync
-    
+
     func syncProfileToCloud(_ profile: Profile, context: NSManagedObjectContext) async throws {
         guard let userId = Auth.auth().currentUser?.uid,
               !Auth.auth().currentUser!.isAnonymous else {
@@ -234,8 +224,7 @@ class FirestoreService {
                     do {
                         let profiles = try context.fetch(fetchRequest)
                         let profile = profiles.first ?? Profile(context: context)
-                        
-                        // ✅ FIX: Only update if cloud has non-default values
+
                         if firestoreProfile.userName != "User" {
                             profile.userName = firestoreProfile.userName
                         }
@@ -259,8 +248,6 @@ class FirestoreService {
         }
     }
     
-    // MARK: - Full Sync
-    
     func syncAllDataFromCloud(context: NSManagedObjectContext) async throws {
         print("📥 Starting full sync from cloud...")
         try await syncProfileFromCloud(context: context)
@@ -280,8 +267,6 @@ class FirestoreService {
         
         print("✅ Full sync to cloud completed")
     }
-    
-    // MARK: - Delete User Data
     
     func deleteAllUserData() async throws {
         guard let userId = Auth.auth().currentUser?.uid else {
