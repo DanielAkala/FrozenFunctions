@@ -5,27 +5,22 @@ import FirebaseCore
 import FirebaseAuth
 import GoogleSignIn
 
-// MARK: - AppDelegate for Notifications
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-        
-        // Initialize Firebase
+
         FirebaseApp.configure()
-        
-        
-        // Set notification delegate but DON'T request permission here
+
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         
         
         return true
     }
-    
-    // Handle Google Sign-In URL
+
     func application(
         _ app: UIApplication,
         open url: URL,
@@ -43,12 +38,11 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 }
 
-// MARK: - Main App
 @main
 struct FrozenFunctionsiOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authManager = AuthenticationManager()
-    @State private var isTransitioning = false  // ✅ NEW: Track transition state
+    @State private var isTransitioning = false 
     
     let persistence = PersistenceController.shared
     
@@ -65,38 +59,32 @@ struct FrozenFunctionsiOSApp: App {
             ZStack {
                 Group {
                     if authManager.user == nil {
-                        // No user - show welcome screen
                         ModernWelcomeView()
                             .environmentObject(authManager)
                             .transition(.opacity)
                     } else if authManager.needsProfileSetup {
-                        // ✅ NEW: Google user needs profile setup
                         GoogleProfileSetupView()
                             .environmentObject(authManager)
                             .transition(.opacity)
                     } else {
-                        // User authenticated and profile complete
                         ContentView()
                             .environment(\.managedObjectContext, persistence.container.viewContext)
                             .environmentObject(authManager)
                             .transition(.opacity)
                     }
                 }
-                .opacity(isTransitioning ? 0 : 1)  // ✅ Fade out during transition
-                .blur(radius: isTransitioning ? 10 : 0)  // ✅ Blur during transition
+                .opacity(isTransitioning ? 0 : 1)  
+                .blur(radius: isTransitioning ? 10 : 0)  
             }
-            .animation(.easeInOut(duration: 0.15), value: authManager.user?.uid)  // ✅ Faster animation
+            .animation(.easeInOut(duration: 0.15), value: authManager.user?.uid) 
             .animation(.easeInOut(duration: 0.15), value: authManager.needsProfileSetup)
             .animation(.easeInOut(duration: 0.15), value: isTransitioning)
             .onChange(of: authManager.user?.uid) { oldValue, newValue in
-                // ✅ Smooth transition when auth state changes
                 if oldValue != newValue {
-                    withAnimation(.easeInOut(duration: 0.1)) {  // ✅ Faster transition
+                    withAnimation(.easeInOut(duration: 0.1)) { 
                         isTransitioning = true
                     }
-                    
-                    // Reset transition state after animation completes
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {  // ✅ Shorter delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {  
                         withAnimation(.easeInOut(duration: 0.1)) {
                             isTransitioning = false
                         }
