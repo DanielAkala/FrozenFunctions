@@ -2,14 +2,9 @@ import Foundation
 
 class EmailService {
     static let shared = EmailService()
-    
-    // ✅ Your Firebase Cloud Function URL
     private let functionURL = "https://sendverificationcode-oq5ojojfyq-uc.a.run.app"
-    // Update this URL after deploying! Get it from Firebase Console → Functions
     
     private init() {}
-    
-    /// Send verification code to email using Firebase Cloud Function
     func sendVerificationCode(to email: String, code: String) async throws -> String {
         guard let url = URL(string: functionURL) else {
             throw EmailServiceError.invalidURL
@@ -36,8 +31,6 @@ class EmailService {
             print("❌ Email Function Error: \(errorMessage)")
             throw EmailServiceError.sendFailed(statusCode: httpResponse.statusCode)
         }
-        
-        // Parse response to get the code
         if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let returnedCode = json["code"] as? String {
             print("✅ Verification code sent to \(email)")
@@ -46,8 +39,6 @@ class EmailService {
         
         throw EmailServiceError.invalidResponse
     }
-    
-    /// Generate 6-digit verification code
     func generateVerificationCode() -> String {
         return String(format: "%06d", Int.random(in: 100000...999999))
     }
