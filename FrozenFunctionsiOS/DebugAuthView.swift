@@ -1,10 +1,6 @@
 import SwiftUI
 import FirebaseAuth
 
-// MARK: - TEMPORARY DEBUG VIEW
-// Add this to your project temporarily to diagnose guest mode issues
-// Remove after testing!
-
 struct DebugAuthView: View {
     @EnvironmentObject var authManager: AuthenticationManager
     @State private var statusMessage = "Checking..."
@@ -18,7 +14,6 @@ struct DebugAuthView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        // Status Section
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Auth Status")
                                 .font(.headline)
@@ -35,8 +30,6 @@ struct DebugAuthView: View {
                         
                         Divider()
                             .background(Color.white.opacity(0.3))
-                        
-                        // Actions Section
                         VStack(spacing: 16) {
                             Text("Debug Actions")
                                 .font(.headline)
@@ -96,8 +89,6 @@ struct DebugAuthView: View {
                         
                         Divider()
                             .background(Color.white.opacity(0.3))
-                        
-                        // Status Message
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Last Action:")
                                 .font(.headline)
@@ -114,8 +105,6 @@ struct DebugAuthView: View {
                         .padding()
                         .background(Color.white.opacity(0.05))
                         .cornerRadius(12)
-                        
-                        // Instructions
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Instructions:")
                                 .font(.headline)
@@ -191,13 +180,8 @@ struct DebugAuthView: View {
     
     private func nukeEverything() {
         do {
-            // Sign out from Firebase
             try Auth.auth().signOut()
-            
-            // Clear guest UID
             UserDefaults.standard.removeObject(forKey: "guestAccountUID")
-            
-            // Force authManager to update
             DispatchQueue.main.async {
                 authManager.user = nil
                 authManager.isAnonymous = false
@@ -219,8 +203,6 @@ struct DebugAuthView: View {
         }
     }
 }
-
-// Helper view for displaying info
 struct InfoRow: View {
     let label: String
     let value: String
@@ -238,30 +220,6 @@ struct InfoRow: View {
         }
     }
 }
-
-// MARK: - How to Use This Debug View
-/*
- Add this to your ContentView or create a navigation link to it:
- 
- // In your ContentView or ProfileView, add a debug button:
- .sheet(isPresented: $showDebugView) {
-     DebugAuthView()
-         .environmentObject(authManager)
- }
- 
- // Add a button to show it:
- Button("🐛 Debug") {
-     showDebugView = true
- }
- 
- Then:
- 1. Open the debug view
- 2. Check your status
- 3. If stuck, tap "NUKE: Sign Out + Clear Everything"
- 4. App should return to welcome screen
- 5. Remove this debug view after testing!
-*/
-
 #Preview {
     DebugAuthView()
         .environmentObject(AuthenticationManager())
