@@ -1,6 +1,5 @@
 import Foundation
 
-// MARK: - Recipe Model (Updated)
 struct Recipe: Identifiable, Codable {
     let id = UUID()
     let name: String
@@ -14,12 +13,10 @@ struct Recipe: Identifiable, Codable {
     }
 }
 
-// MARK: - API Response Models
 struct RecipeResponse: Codable {
     let recipes: [Recipe]
 }
 
-// MARK: - Recipe Service
 class RecipeService {
     private let firebaseFunctionURL = "https://generaterecipes-oq5ojojfyq-uc.a.run.app"
     
@@ -56,7 +53,6 @@ class RecipeService {
     }
 }
 
-// MARK: - Custom Errors
 enum RecipeServiceError: LocalizedError {
     case invalidURL
     case invalidResponse
