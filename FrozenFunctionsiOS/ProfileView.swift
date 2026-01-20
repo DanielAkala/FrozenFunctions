@@ -19,7 +19,7 @@ struct ProfileView: View {
     @State private var tempFridgeName = ""
     @State private var showingSettings = false
     @State private var showingUpgradeAccount = false
-    @State private var showingSignInPrompt = false  // ✅ NEW
+    @State private var showingSignInPrompt = false 
     @State private var showingSignOutAlert = false
     @State private var showingDeleteAlert = false
     
@@ -31,11 +31,9 @@ struct ProfileView: View {
                 Styles.Colors.mainColor.ignoresSafeArea()
                 
                 Form {
-                    // Account Status Section
                     if let user = authManager.user {
                         Section {
                             if authManager.isAnonymous {
-                                // ✅ UPDATED: Anonymous User - Show Sign In Prompt
                                 VStack(alignment: .leading, spacing: 12) {
                                     HStack {
                                         Image(systemName: "exclamationmark.triangle.fill")
@@ -50,7 +48,6 @@ struct ProfileView: View {
                                         .foregroundColor(Styles.Colors.thirdColor)
                                     
                                     Button(action: {
-                                        // ✅ Save guest food items before showing sign in screen
                                         Task {
                                             await saveGuestFoodItemsBeforeSignIn()
                                             await MainActor.run {
@@ -71,7 +68,6 @@ struct ProfileView: View {
                                     }
                                     
                                     Button(action: {
-                                        // Guest sign out - no confirmation needed since data is preserved
                                         signOut()
                                     }) {
                                         HStack {
@@ -89,7 +85,6 @@ struct ProfileView: View {
                                 .padding(.vertical, 8)
                                 .listRowBackground(Styles.Colors.secondaryColor)
                             } else {
-                                // Signed In User
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack {
                                         Image(systemName: "checkmark.circle.fill")
@@ -114,7 +109,6 @@ struct ProfileView: View {
                     }
                     
                     Section {
-                        // --- Name Editing Section ---
                         HStack(alignment: .center, spacing: 8) {
                             Label("Name:", systemImage: "person.circle.fill")
                                 .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
@@ -145,8 +139,6 @@ struct ProfileView: View {
                                 isTextFieldFocused = false
                             }
                         }
-                        
-                        // --- Fridge Editing Section ---
                         HStack(alignment: .center, spacing: 8) {
                             Label("Fridge:", systemImage: "snowflake")
                                 .foregroundStyle(Styles.Colors.accentColor, Styles.Colors.iconColor)
@@ -206,8 +198,6 @@ struct ProfileView: View {
                     } header: {
                         Label("Personal Information", systemImage: "person.text.rectangle.fill")
                     }
-                    
-                    // --- Dietary Restrictions Section ---
                     Section {
                         HStack(alignment: .center, spacing: 8) {
                             Label("Selected:", systemImage: "leaf.circle.fill")
@@ -254,8 +244,6 @@ struct ProfileView: View {
                     header: {
                         Label("Dietary Restiction", systemImage: "fork.knife")
                     }
-                    
-                    // Settings Section
                     Section {
                         Button(action: {
                             showingSettings = true
@@ -276,8 +264,6 @@ struct ProfileView: View {
                     } header: {
                         Label("App Settings", systemImage: "slider.horizontal.3")
                     }
-                    
-                    // Account Actions Section
                     if authManager.user != nil && !authManager.isAnonymous {
                         Section {
                             Button(action: {
@@ -396,13 +382,9 @@ struct ProfileView: View {
             
             try viewContext.save()
             print("✅ Profile saved: userName='\(name)', fridgeName='\(fridgeName)', diet='\(selectedOption)'")
-            
-            // Verify the save worked
             let verifyFetch: NSFetchRequest<Profile> = Profile.fetchRequest()
             let savedProfiles = try viewContext.fetch(verifyFetch)
             print("✅ Verification: \(savedProfiles.count) profiles in database after save")
-            
-            // ✅ Sync profile to Firestore
             Task {
                 do {
                     try await FirestoreService.shared.syncProfileToCloud(profile, context: viewContext)
@@ -418,8 +400,6 @@ struct ProfileView: View {
     
     private func signOut() {
         do {
-            // Let AuthenticationManager handle data clearing based on user type
-            // (Guest data is preserved, real user data is cleared)
             try authManager.signOut()
             print("✅ Signed out successfully")
         } catch {
@@ -429,7 +409,6 @@ struct ProfileView: View {
     
     private func deleteAccount() async {
         do {
-            // ✅ Clear all local data before deleting
             clearAllLocalData()
             try await authManager.deleteAccount()
         } catch {
@@ -437,15 +416,12 @@ struct ProfileView: View {
         }
     }
     
-    // ✅ NEW: Clear all Core Data
     private func clearAllLocalData() {
         let context = viewContext
-        
-        // Delete all FoodItems
+
         let foodFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "FoodItem")
         let foodBatchDelete = NSBatchDeleteRequest(fetchRequest: foodFetch)
-        
-        // Delete all Profiles
+
         let profileFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Profile")
         let profileBatchDelete = NSBatchDeleteRequest(fetchRequest: profileFetch)
         
@@ -458,8 +434,7 @@ struct ProfileView: View {
             print("❌ Failed to clear local data: \(error)")
         }
     }
-    
-    // ✅ Save guest food items before transitioning to sign-in
+
     private func saveGuestFoodItemsBeforeSignIn() async {
         let context = viewContext
         let fetchRequest: NSFetchRequest<FoodItem> = FoodItem.fetchRequest()
@@ -472,8 +447,7 @@ struct ProfileView: View {
                     print("ℹ️ No guest items to save")
                     return
                 }
-                
-                // Convert food items to dictionaries for storage
+
                 let itemsData = items.map { item -> [String: Any] in
                     return [
                         "name": item.name ?? "",
@@ -482,8 +456,7 @@ struct ProfileView: View {
                         "expirationDate": (item.expirationDate ?? Date()).timeIntervalSince1970
                     ]
                 }
-                
-                // Save to UserDefaults
+
                 if let data = try? JSONSerialization.data(withJSONObject: itemsData) {
                     UserDefaults.standard.set(data, forKey: "pendingGuestFoodItems")
                     print("✅ Saved \(items.count) guest food items to transfer")
