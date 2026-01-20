@@ -3,13 +3,12 @@ import CoreData
 import FirebaseAuth
 
 struct ModernWelcomeView: View {
-    @EnvironmentObject var authManager: AuthenticationManager  // ✅ Use the shared instance
+    @EnvironmentObject var authManager: AuthenticationManager 
     @State private var showSignIn = false
     @State private var showSignUp = false
     
     var body: some View {
         ZStack {
-            // Gradient Background
             LinearGradient(
                 gradient: Gradient(colors: [
                     Color(red: 0.076, green: 0.153, blue: 0.278),
@@ -23,8 +22,6 @@ struct ModernWelcomeView: View {
             
             VStack(spacing: 24) {
                 Spacer()
-                
-                // Logo and Title
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()
@@ -48,10 +45,7 @@ struct ModernWelcomeView: View {
                         .foregroundColor(.white.opacity(0.7))
                 }
                 .padding(.bottom, 40)
-                
-                // Action Buttons
                 VStack(spacing: 16) {
-                    // Create Account Button
                     Button(action: { showSignUp = true }) {
                         Text("Create Account")
                             .font(.system(size: 18, weight: .semibold))
@@ -61,8 +55,6 @@ struct ModernWelcomeView: View {
                             .background(.white)
                             .cornerRadius(16)
                     }
-                    
-                    // Sign In Button
                     Button(action: { showSignIn = true }) {
                         Text("Sign In")
                             .font(.system(size: 18, weight: .semibold))
@@ -76,8 +68,6 @@ struct ModernWelcomeView: View {
                                     .stroke(Color.white.opacity(0.3), lineWidth: 1)
                             )
                     }
-                    
-                    // Divider
                     HStack {
                         Rectangle()
                             .fill(Color.white.opacity(0.3))
@@ -91,8 +81,6 @@ struct ModernWelcomeView: View {
                             .frame(height: 1)
                     }
                     .padding(.vertical, 8)
-                    
-                    // Google Sign In
                     Button(action: {
                         Task { await handleGoogleSignIn() }
                     }) {
@@ -113,8 +101,6 @@ struct ModernWelcomeView: View {
                         )
                     }
                     .disabled(authManager.isLoading)
-                    
-                    // Guest Mode
                     Button(action: {
                         Task { await handleGuestMode() }
                     }) {
