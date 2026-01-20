@@ -13,7 +13,7 @@ class AuthenticationManager: ObservableObject {
     @Published var needsProfileSetup = false
     
     private var authStateListener: AuthStateDidChangeListenerHandle?
-    private var lastSyncedUserId: String? // Track which user we've synced for
+    private var lastSyncedUserId: String? 
     
     var userOnlineMode: Bool {
         get {
@@ -48,22 +48,19 @@ class AuthenticationManager: ObservableObject {
     }
     
     init() {
-        // Check if there's already a signed-in user
         if let currentUser = Auth.auth().currentUser {
             self.user = currentUser
             self.isAnonymous = currentUser.isAnonymous
-            self.lastSyncedUserId = currentUser.uid // Mark as already synced
+            self.lastSyncedUserId = currentUser.uid 
             print("🔄 Restored user session: \(currentUser.uid) - Anonymous: \(currentUser.isAnonymous)")
         }
         
         authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
-                // ✅ If a real user is signing in and there was a guest before, delete guest account
                 if let newUser = user, !newUser.isAnonymous {
                     if let previousUserId = self?.lastSyncedUserId,
                        previousUserId != newUser.uid,
                        UserDefaults.standard.string(forKey: "guestAccountUID") != nil {
-                        // Previous session was guest, new session is real user
                         print("🗑️ Cleaning up previous guest account...")
                         UserDefaults.standard.removeObject(forKey: "guestAccountUID")
                     }
@@ -73,11 +70,9 @@ class AuthenticationManager: ObservableObject {
                 self?.isAnonymous = user?.isAnonymous ?? false
                 print("📝 Auth state changed: \(user?.uid ?? "nil") - Anonymous: \(user?.isAnonymous ?? false)")
                 
-                // Only sync if this is a NEW user (not just an auth state refresh)
                 if let user = user, !user.isAnonymous {
                     let userId = user.uid
                     if self?.lastSyncedUserId != userId {
-                        // This is a new user signing in - sync their data
                         self?.lastSyncedUserId = userId
                         Task {
                             await self?.syncDataOnSignIn()
@@ -86,9 +81,8 @@ class AuthenticationManager: ObservableObject {
                         print("ℹ️ Same user, skipping sync to preserve local data")
                     }
                 } else if user == nil {
-                    // User signed out - clear the sync tracker and reset state
                     self?.lastSyncedUserId = nil
-                    self?.needsProfileSetup = false  // ✅ Reset profile setup flag
+                    self?.needsProfileSetup = false 
                 }
             }
         }
@@ -100,7 +94,6 @@ class AuthenticationManager: ObservableObject {
         }
     }
     
-    // MARK: - Reload User
     func reloadUser() async throws {
         guard let currentUser = Auth.auth().currentUser else {
             throw NSError(domain: "AuthenticationManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in"])
@@ -116,9 +109,6 @@ class AuthenticationManager: ObservableObject {
     
     private func syncDataOnSignIn() async {
         let context = PersistenceController.shared.container.viewContext
-        
-        // ✅ ALWAYS clear local data first when signing in as a new user
-        // This prevents data bleeding between accounts
         await MainActor.run {
             print("🗑️ Clearing previous user's data...")
             let foodFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "FoodItem")
@@ -140,29 +130,22 @@ class AuthenticationManager: ObservableObject {
         do {
             print("📥 Starting cloud sync for new user...")
             
-            // Check if user has cloud data
             let hasCloudProfile = try await FirestoreService.shared.profileExists(userId: Auth.auth().currentUser?.uid ?? "")
             
             if hasCloudProfile {
                 print("☁️ Cloud profile found, downloading...")
-                // Download from cloud
                 try await FirestoreService.shared.syncAllDataFromCloud(context: context)
                 print("✅ Data synced from cloud")
             } else {
                 print("📱 No cloud data found, creating default profile")
-                // No cloud data - create default profile
                 await createDefaultProfile()
             }
             
-            // ✅ MERGE guest food items if any were saved
             await mergeGuestFoodItems()
             
         } catch {
             print("⚠️ Sync failed: \(error)")
-            // Create default profile on error
             await createDefaultProfile()
-            
-            // ✅ Still try to merge guest items
             await mergeGuestFoodItems()
         }
     }
@@ -184,8 +167,6 @@ class AuthenticationManager: ObservableObject {
                     
                     try context.save()
                     print("✅ Default profile created: \(profile.userName ?? "User")")
-                    
-                    // ✅ Immediately sync new profile to cloud
                     Task {
                         do {
                             try await FirestoreService.shared.syncProfileToCloud(profile, context: context)
@@ -202,17 +183,11 @@ class AuthenticationManager: ObservableObject {
             }
         }
     }
-    
-    // MARK: - Anonymous Sign In (Reuses Existing Guest Account)
     func signInAnonymously() async throws {
         isLoading = true
         defer { isLoading = false }
-        
-        // ✅ Check if there's already an authenticated anonymous user in Firebase
         if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
             print("✅ Firebase session still active - restoring guest: \(currentUser.uid)")
-            
-            // ✅ Verify the account actually exists by reloading user data
             do {
                 try await currentUser.reload()
                 print("✅ Guest account verified in Firebase")
@@ -223,8 +198,6 @@ class AuthenticationManager: ObservableObject {
                     self.user = currentUser
                     self.isAnonymous = true
                 }
-                
-                // ✅ Verify profile exists, create if missing
                 let context = PersistenceController.shared.container.viewContext
                 await MainActor.run {
                     let fetchRequest: NSFetchRequest<Profile> = Profile.fetchRequest()
@@ -248,16 +221,12 @@ class AuthenticationManager: ObservableObject {
                 
                 return
             } catch {
-                // ✅ Account was deleted or invalid - sign out and create new one
                 print("⚠️ Guest account no longer valid (possibly deleted): \(error)")
                 print("🗑️ Clearing stale session...")
                 try? Auth.auth().signOut()
                 UserDefaults.standard.removeObject(forKey: "guestAccountUID")
-                // Fall through to create new account
             }
         }
-        
-        // ✅ If we reach here, Firebase session is gone - create new guest account
         print("🆕 Creating new guest account...")
         
         do {
@@ -266,8 +235,6 @@ class AuthenticationManager: ObservableObject {
                 self.user = result.user
                 self.isAnonymous = true
             }
-            
-            // Store guest UID
             UserDefaults.standard.set(result.user.uid, forKey: "guestAccountUID")
             print("✅ New anonymous user created: \(result.user.uid)")
             
@@ -279,8 +246,6 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // MARK: - Email/Password Sign Up
     func signUp(email: String, password: String) async throws {
         isLoading = true
         defer { isLoading = false }
@@ -291,11 +256,7 @@ class AuthenticationManager: ObservableObject {
                 self.user = result.user
                 self.isAnonymous = false
             }
-            print("✅ User created: \(result.user.uid)")
-            
-            // ✅ Using custom verification code instead of Firebase email links
-            // No need to send Firebase verification email
-            
+            print("✅ User created: \(result.user.uid)")           
         } catch {
             await MainActor.run {
                 self.errorMessage = self.friendlyErrorMessage(error)
@@ -303,8 +264,6 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // MARK: - Email/Password Sign In
     func signIn(email: String, password: String) async throws {
         isLoading = true
         defer { isLoading = false }
@@ -325,8 +284,6 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // MARK: - Google Sign In
     func signInWithGoogle() async throws {
         guard let clientID = FirebaseApp.app()?.options.clientID else {
             throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing client ID"])
@@ -360,18 +317,14 @@ class AuthenticationManager: ObservableObject {
                 self.isAnonymous = false
             }
             print("✅ Google sign in successful: \(result.user.uid)")
-            
-            // ✅ Check if this is a NEW Google user
             let hasExistingProfile = try await checkForExistingProfile(userId: result.user.uid)
             
             if !hasExistingProfile {
-                // ✅ NEW user - show profile setup screen
                 await MainActor.run {
                     self.needsProfileSetup = true
                 }
                 print("ℹ️ New Google user - showing profile setup")
             } else {
-                // Existing user - sync data normally
                 await syncDataOnSignIn()
             }
         } catch {
@@ -381,13 +334,10 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // ✅ NEW: Complete profile setup (called from profile setup screen)
     func completeProfileSetup(username: String, fridgeName: String, notifications: Bool, onlineMode: Bool) async throws {
         let context = PersistenceController.shared.container.viewContext
         
         await MainActor.run {
-            // ✅ Check if profile already exists
             let fetchRequest: NSFetchRequest<Profile> = Profile.fetchRequest()
             
             do {
@@ -395,24 +345,18 @@ class AuthenticationManager: ObservableObject {
                 let profile: Profile
                 
                 if let existingProfile = existingProfiles.first {
-                    // Update existing profile
                     profile = existingProfile
                     print("📝 Updating existing profile during setup")
                 } else {
-                    // Create new profile
                     profile = Profile(context: context)
                     print("📝 Creating new profile during setup")
                 }
-                
-                // Set the values
                 profile.userName = username
                 profile.fridgeName = fridgeName
                 profile.diet = "None"
                 
                 try context.save()
                 print("✅ Profile setup saved: userName='\(username)', fridgeName='\(fridgeName)'")
-                
-                // Verify the save
                 let verifyProfiles = try context.fetch(fetchRequest)
                 print("✅ Verification: \(verifyProfiles.count) profile(s) in database")
                 if let savedProfile = verifyProfiles.first {
@@ -421,8 +365,6 @@ class AuthenticationManager: ObservableObject {
             } catch {
                 print("❌ Failed to save profile: \(error)")
             }
-            
-            // ✅ Save preferences with user-specific keys
             if let userId = Auth.auth().currentUser?.uid {
                 UserDefaults.standard.set(onlineMode, forKey: "onlineMode_\(userId)")
                 UserDefaults.standard.set(notifications, forKey: "notificationsEnabled_\(userId)")
@@ -432,12 +374,8 @@ class AuthenticationManager: ObservableObject {
                 UserDefaults.standard.set(onlineMode, forKey: "onlineMode")
                 UserDefaults.standard.set(notifications, forKey: "notificationsEnabled")
             }
-            
-            // Mark setup as complete
             self.needsProfileSetup = false
         }
-        
-        // ✅ Sync to cloud
         do {
             let fetchRequest: NSFetchRequest<Profile> = Profile.fetchRequest()
             if let profile = try context.fetch(fetchRequest).first {
@@ -450,8 +388,6 @@ class AuthenticationManager: ObservableObject {
             print("⚠️ Failed to sync profile to cloud: \(error)")
         }
     }
-    
-    // ✅ Helper to check if user has existing profile in Firestore
     private func checkForExistingProfile(userId: String) async throws -> Bool {
         do {
             let profileExists = try await FirestoreService.shared.profileExists(userId: userId)
@@ -461,8 +397,6 @@ class AuthenticationManager: ObservableObject {
             return false
         }
     }
-    
-    // MARK: - Password Reset
     func sendPasswordReset(to email: String) async throws {
         isLoading = true
         defer { isLoading = false }
@@ -477,8 +411,6 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // MARK: - Send Verification Code (For Custom Flow)
     func sendVerificationCode(to email: String) async throws -> String {
         let code = String(format: "%06d", Int.random(in: 0...999999))
         
@@ -489,8 +421,6 @@ class AuthenticationManager: ObservableObject {
         
         return code
     }
-    
-    // MARK: - Verify Code
     func verifyCode(_ code: String, for email: String) -> Bool {
         guard let storedCode = UserDefaults.standard.string(forKey: "verificationCode_\(email)"),
               let codeTime = UserDefaults.standard.object(forKey: "verificationCodeTime_\(email)") as? Date else {
@@ -514,8 +444,6 @@ class AuthenticationManager: ObservableObject {
         
         return isValid
     }
-    
-    // MARK: - Convert Anonymous to Permanent Account
     func linkAnonymousAccount(email: String, password: String) async throws {
         guard let currentUser = Auth.auth().currentUser, currentUser.isAnonymous else {
             throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No anonymous user to link"])
@@ -534,12 +462,8 @@ class AuthenticationManager: ObservableObject {
             }
             
             print("✅ Anonymous account linked successfully!")
-            
-            // Clear guest UID since it's now a permanent account
+
             UserDefaults.standard.removeObject(forKey: "guestAccountUID")
-            
-            // ✅ Using custom verification code instead of Firebase email links
-            // No need to send Firebase verification email
             
             await migrateLocalDataToCloud()
         } catch {
@@ -549,8 +473,6 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // MARK: - Link Anonymous to Google Account
     func linkAnonymousAccountWithGoogle() async throws {
         guard let currentUser = Auth.auth().currentUser, currentUser.isAnonymous else {
             throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No anonymous user to link"])
@@ -590,8 +512,6 @@ class AuthenticationManager: ObservableObject {
             }
             
             print("✅ Anonymous account linked to Google!")
-            
-            // Clear guest UID since it's now a permanent account
             UserDefaults.standard.removeObject(forKey: "guestAccountUID")
             
             await migrateLocalDataToCloud()
@@ -602,17 +522,12 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // MARK: - Sign Out (with Data Sync & Cleanup)
     func signOut() throws {
         let wasAnonymous = Auth.auth().currentUser?.isAnonymous ?? false
         let guestUID = Auth.auth().currentUser?.uid
         
         if !wasAnonymous {
-            // Real account - sync to cloud, clear local data, THEN sign out
             let context = PersistenceController.shared.container.viewContext
-            
-            // ✅ Sync to cloud first (synchronously using semaphore)
             let syncGroup = DispatchGroup()
             syncGroup.enter()
             
@@ -625,15 +540,9 @@ class AuthenticationManager: ObservableObject {
                 }
                 syncGroup.leave()
             }
-            
-            // Wait for sync to complete (with timeout)
             _ = syncGroup.wait(timeout: .now() + 5)
-            
-            // ✅ Clear local data BEFORE signing out
             clearAllLocalData()
             print("🗑️ Local data cleared before sign out")
-            
-            // Now sign out from Firebase
             do {
                 try Auth.auth().signOut()
                 GIDSignIn.sharedInstance.signOut()
@@ -643,31 +552,20 @@ class AuthenticationManager: ObservableObject {
                 throw error
             }
         } else {
-            // ✅ Guest account - DON'T sign out from Firebase
-            // Just reset the app state to show welcome screen
             print("✅ Guest mode - resetting to welcome screen (keeping Firebase session)")
-            
-            // Store the guest UID (even though we're not signing out)
             if let guestUID = guestUID {
                 UserDefaults.standard.set(guestUID, forKey: "guestAccountUID")
                 print("💾 Guest UID stored: \(guestUID)")
             }
-            
-            // ✅ Just reset the published user to nil to trigger welcome screen
-            // The Firebase session remains active in the background
             DispatchQueue.main.async { [weak self] in
                 self?.user = nil
                 self?.isAnonymous = false
                 self?.needsProfileSetup = false
                 print("🔄 App state reset - welcome screen will show")
             }
-            
-            // DON'T clear local data - keep it for when they sign back in as guest
             print("ℹ️ Guest data preserved locally")
         }
     }
-    
-    // MARK: - Delete Account
     func deleteAccount() async throws {
         guard let user = Auth.auth().currentUser else { return }
         
@@ -675,20 +573,13 @@ class AuthenticationManager: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // ✅ Delete user data from Firestore FIRST (before deleting auth account)
             if !user.isAnonymous {
                 print("🗑️ Deleting user data from Firestore...")
                 try await FirestoreService.shared.deleteAllUserData()
                 print("✅ Firestore data deleted")
             }
-            
-            // Clear local data
             clearAllLocalData()
-            
-            // Clear guest UID if exists
             UserDefaults.standard.removeObject(forKey: "guestAccountUID")
-            
-            // Delete Firebase Auth account
             try await user.delete()
             
             await MainActor.run {
@@ -703,8 +594,6 @@ class AuthenticationManager: ObservableObject {
             throw error
         }
     }
-    
-    // MARK: - Helper Methods
     private func friendlyErrorMessage(_ error: Error) -> String {
         let errorCode = (error as NSError).code
         switch errorCode {
@@ -753,10 +642,7 @@ class AuthenticationManager: ObservableObject {
             print("❌ Failed to clear local data: \(error)")
         }
     }
-    
-    // ✅ Merge guest food items into new account
     private func mergeGuestFoodItems() async {
-        // Check if there are pending guest food items
         guard let data = UserDefaults.standard.data(forKey: "pendingGuestFoodItems"),
               let itemsArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
               !itemsArray.isEmpty else {
@@ -775,8 +661,6 @@ class AuthenticationManager: ObservableObject {
                 foodItem.name = itemData["name"] as? String ?? ""
                 foodItem.quantity = itemData["quantity"] as? Int16 ?? 1
                 foodItem.unit = itemData["unit"] as? String ?? "units"
-                
-                // Convert timestamp back to Date
                 if let timestamp = itemData["expirationDate"] as? TimeInterval {
                     foodItem.expirationDate = Date(timeIntervalSince1970: timestamp)
                 } else {
@@ -787,11 +671,7 @@ class AuthenticationManager: ObservableObject {
             do {
                 try context.save()
                 print("✅ Successfully merged \(itemsArray.count) guest food items")
-                
-                // Clear the pending items
                 UserDefaults.standard.removeObject(forKey: "pendingGuestFoodItems")
-                
-                // Sync the merged items to cloud
                 Task {
                     do {
                         try await FirestoreService.shared.syncAllDataToCloud(context: context)
