@@ -58,8 +58,6 @@ struct ModernPasswordResetFlow: View {
             Text(alertMessage)
         }
     }
-    
-    // MARK: - Step 1: Enter Email
     private var emailStep: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -155,8 +153,6 @@ struct ModernPasswordResetFlow: View {
             .padding(.bottom, 40)
         }
     }
-    
-    // MARK: - Step 2: Verify Code
     private var verificationStep: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -267,8 +263,6 @@ struct ModernPasswordResetFlow: View {
             .padding(.bottom, 40)
         }
     }
-    
-    // MARK: - Step 3: New Password
     private var newPasswordStep: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -414,8 +408,6 @@ struct ModernPasswordResetFlow: View {
             .padding(.bottom, 40)
         }
     }
-    
-    // MARK: - Helper Views
     struct ProgressIndicator: View {
         let currentStep: Int
         let totalSteps: Int
@@ -431,13 +423,9 @@ struct ModernPasswordResetFlow: View {
             .padding(.bottom, 16)
         }
     }
-    
-    // MARK: - Helper Properties
     private var passwordsMatch: Bool {
         newPassword == confirmPassword && !confirmPassword.isEmpty
     }
-    
-    // MARK: - Actions
     private func isValidEmail(_ email: String) -> Bool {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
