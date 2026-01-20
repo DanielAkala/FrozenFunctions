@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct Styles {
-    // use #colorLiteral inside Color()
     struct Colors {
         static let mainColor = Color(#colorLiteral(red: 0.076, green: 0.153, blue: 0.278, alpha: 1))
         static let secondaryColor = Color(#colorLiteral(red: 0.203, green: 0.243, blue: 0.388, alpha: 1))
@@ -25,15 +24,12 @@ struct Styles {
     struct CustomTextFieldStyle: TextFieldStyle {
         func _body(configuration: TextField<Self._Label>) -> some View {
             configuration
-                // This is for the actual text input and placeholder
                 .foregroundColor(Styles.Colors.accentColor)
                 .padding(12)
                 .background(
-                    // Use the secondary color for the background of the text field
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Styles.Colors.secondaryColor)
                 )
-                // Sets the cursor color to match the rest of your UI
                 .accentColor(Styles.Colors.accentColor)
         }
     }
