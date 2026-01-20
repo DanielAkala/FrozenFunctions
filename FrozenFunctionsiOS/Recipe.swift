@@ -1,8 +1,5 @@
 import Foundation
 
-// Sample recipes for the badge count in ContentView
-// These are simple recipes that match against fridge items
-struct SimpleRecipe: Identifiable {
     let id = UUID()
     let name: String
     let ingredients: [String]
