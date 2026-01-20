@@ -27,7 +27,6 @@ struct GoogleProfileSetupView: View {
             
             ScrollView {
                 VStack(spacing: 0) {
-                    // Header
                     VStack(spacing: 16) {
                         ZStack {
                             Circle()
@@ -49,16 +48,12 @@ struct GoogleProfileSetupView: View {
                     }
                     .padding(.top, 60)
                     .padding(.bottom, 40)
-                    
-                    // Profile Setup Card
                     VStack(spacing: 24) {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Setup Your Profile")
                                 .font(.headline)
                                 .foregroundColor(.white)
                                 .padding(.bottom, 8)
-                            
-                            // Username Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Username")
                                     .font(.subheadline)
@@ -82,8 +77,6 @@ struct GoogleProfileSetupView: View {
                                         .stroke(Color.white.opacity(0.2), lineWidth: 1)
                                 )
                             }
-                            
-                            // Fridge Name Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Fridge Name")
                                     .font(.subheadline)
@@ -107,16 +100,12 @@ struct GoogleProfileSetupView: View {
                                         .stroke(Color.white.opacity(0.2), lineWidth: 1)
                                 )
                             }
-                            
-                            // Preferences
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Preferences")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundColor(.white.opacity(0.9))
                                     .padding(.top, 8)
-                                
-                                // Online Mode Toggle
                                 HStack {
                                     HStack(spacing: 12) {
                                         Image(systemName: "wifi")
@@ -135,8 +124,6 @@ struct GoogleProfileSetupView: View {
                                 .padding(16)
                                 .background(Color.white.opacity(0.1))
                                 .cornerRadius(12)
-                                
-                                // Notifications Toggle
                                 HStack {
                                     HStack(spacing: 12) {
                                         Image(systemName: "bell.fill")
@@ -157,8 +144,6 @@ struct GoogleProfileSetupView: View {
                                 .cornerRadius(12)
                             }
                         }
-                        
-                        // Complete Setup Button
                         Button(action: { Task { await completeSetup() } }) {
                             HStack(spacing: 8) {
                                 if authManager.isLoading {
@@ -198,7 +183,6 @@ struct GoogleProfileSetupView: View {
             Text(alertMessage)
         }
         .onAppear {
-            // Pre-fill with Google display name if available
             if let displayName = authManager.user?.displayName {
                 username = displayName
             }
@@ -213,8 +197,6 @@ struct GoogleProfileSetupView: View {
                 notifications: notifications,
                 onlineMode: onlineMode
             )
-            
-            // Request notification permission if enabled
             if notifications {
                 await requestNotificationPermission()
             }
