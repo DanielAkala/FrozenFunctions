@@ -19,7 +19,6 @@ struct UpgradeAccountView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Info Section
                         VStack(spacing: 16) {
                             Image(systemName: "cloud.fill")
                                 .font(.system(size: 60))
@@ -46,8 +45,6 @@ struct UpgradeAccountView: View {
                         Divider()
                             .background(Styles.Colors.iconColor)
                             .padding(.horizontal)
-                        
-                        // Email/Password Creation
                         VStack(spacing: 16) {
                             Text("Create Your Account")
                                 .font(.headline)
@@ -66,8 +63,7 @@ struct UpgradeAccountView: View {
                                 .textFieldStyle(Styles.CustomTextFieldStyle())
                         }
                         .padding(.horizontal, 32)
-                        
-                        // Create Account Button
+
                         Button(action: {
                             Task {
                                 await createAccount()
@@ -90,8 +86,7 @@ struct UpgradeAccountView: View {
                         }
                         .disabled(authManager.isLoading || !isValidInput())
                         .padding(.horizontal, 32)
-                        
-                        // OR Divider
+
                         HStack {
                             Rectangle()
                                 .fill(Styles.Colors.iconColor)
@@ -104,8 +99,7 @@ struct UpgradeAccountView: View {
                                 .frame(height: 1)
                         }
                         .padding(.horizontal, 32)
-                        
-                        // Google Sign In
+
                         Button(action: {
                             Task {
                                 await linkWithGoogle()
@@ -129,8 +123,7 @@ struct UpgradeAccountView: View {
                         }
                         .disabled(authManager.isLoading)
                         .padding(.horizontal, 32)
-                        
-                        // Maybe Later
+
                         Button(action: {
                             dismiss()
                         }) {
@@ -166,16 +159,14 @@ struct UpgradeAccountView: View {
             }
         }
     }
-    
-    // MARK: - Validation
+
     private func isValidInput() -> Bool {
         return !email.isEmpty &&
                !password.isEmpty &&
                password == confirmPassword &&
                password.count >= 6
     }
-    
-    // MARK: - Actions
+
     private func createAccount() async {
         guard password == confirmPassword else {
             await MainActor.run {
@@ -223,7 +214,6 @@ struct UpgradeAccountView: View {
     }
 }
 
-// Benefit Row Component
 struct BenefitRow: View {
     let icon: String
     let text: String
