@@ -170,11 +170,8 @@ struct HomeView: View {
             }
         }
     }
-
-    // MARK: - Helper functions
     private func deleteItem(_ item: FoodItem) {
         withAnimation {
-            // ✅ Delete from Firestore first (if authenticated)
             if let itemId = item.id?.uuidString {
                 Task {
                     do {
@@ -184,8 +181,6 @@ struct HomeView: View {
                     }
                 }
             }
-            
-            // Delete from Core Data
             viewContext.delete(item)
             do {
                 try viewContext.save()
