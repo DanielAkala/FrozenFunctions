@@ -12,21 +12,16 @@ FEATURES
 *Swipe to mark items as used*
 *View meal ideas based on fridge contents
 *Clean-out reminder when 3+ items are expired
-*Core Data-powered offline storage (no Firebase or Cloudkit)
+*Core Data-powered offline storage
+*The user can use the online feature to access the AI Recipe Assistant.
 
 TECHNOLOGIES TO BE USED
 *SWiftUI
 *Declarative UI Core Data
 *Local data storage UserNotifications
 *XCode 26+, Swift 5.9+
-
-PROJECT STRUCTURE
-*ContentView.swift - Main dashboard with food items list
-*AddItemView.swift - Add food UI + notificartion setup
-*ShoppingListView.swift - Shopping cart screen
-*Persistence.swift - Core Data stack setup
-*FrozenFunctions.swift - App entry point + notification setup
-*Recipe.swift - Static recipe data model
+*Firebase
+*Gemini API
 
 SETUP INSTRUCTIONS
 Open FrozenFunctions.xcodeproj in XCode 
